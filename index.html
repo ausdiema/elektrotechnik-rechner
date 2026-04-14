@@ -5,65 +5,36 @@
 <title>Elektrotechnik Rechner</title>
 
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
-    margin: 0;
-    padding: 30px;
-  }
+body {
+  font-family: Arial;
+  background: #f4f6f8;
+  padding: 30px;
+}
 
-  .container {
-    max-width: 600px;
-    margin: auto;
-  }
+.container {
+  max-width: 600px;
+  margin: auto;
+}
 
-  .card {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 
-  h2 {
-    text-align: center;
-  }
+input, select, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+}
 
-  label {
-    font-weight: bold;
-    display: block;
-    margin-top: 10px;
-  }
-
-  input, select {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-  }
-
-  button {
-    margin-top: 15px;
-    width: 100%;
-    padding: 12px;
-    background: #1e88e5;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-
-  button:hover {
-    background: #1565c0;
-  }
-
-  .result {
-    margin-top: 20px;
-    font-size: 18px;
-    font-weight: bold;
-    text-align: center;
-  }
+button {
+  background: #1e88e5;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
 </style>
 
 </head>
@@ -71,121 +42,80 @@
 <body>
 
 <div class="container">
-  <div class="card">
+<div class="card">
 
-    <h2>⚡ Elektrotechnik Rechner</h2>
+<h2>⚡ Elektrotechnik Rechner</h2>
 
-    <label>Was berechnen?</label>
-    <select id="type" onchange="renderInputs()">
-      <option value="power">Leistung (P = U × I)</option>
-      <option value="voltage">Spannung (U = P / I)</option>
-      <option value="current">Strom (I = P / U)</option>
-      <option value="resistance">Widerstand (R = U / I)</option>
-    </select>
+<select id="type" onchange="render()">
+  <option value="power">P = U × I</option>
+  <option value="voltage">U = P / I</option>
+  <option value="current">I = P / U</option>
+  <option value="resistance">R = U / I</option>
+</select>
 
-    <div id="inputs"></div>
+<div id="inputs"></div>
 
-    <button onclick="calculate()">Berechnen</button>
+<button onclick="calc()">Berechnen</button>
 
-    <div class="result" id="output"></div>
+<div id="out"></div>
 
-  </div>
+</div>
 </div>
 
 <script>
 
-function convert(value, unit) {
-  let factor = 1;
-
-  switch(unit) {
-    case "m": factor = 0.001; break;
-    case "": factor = 1; break;
-    case "k": factor = 1000; break;
-    case "M": factor = 1000000; break;
-  }
-
-  return value * factor;
-}
-
-function renderInputs() {
-  let type = document.getElementById("type").value;
+function render() {
+  let t = document.getElementById("type").value;
   let html = "";
 
-  html += `
-    <label>Wert 1</label>
-    <input id="a_val" type="number">
-    <select id="a_unit">
-      <option value="">(Basis)</option>
-      <option value="m">m (milli)</option>
-      <option value=""> </option>
-      <option value="k">k (kilo)</option>
-      <option value="M">M (mega)</option>
-    </select>
-  `;
+  if (t === "power") {
+    html = `
+      <input id="a" placeholder="U (Volt)">
+      <input id="b" placeholder="I (Ampere)">
+    `;
+  }
 
-  html += `
-    <label>Wert 2</label>
-    <input id="b_val" type="number">
-    <select id="b_unit">
-      <option value="">(Basis)</option>
-      <option value="m">m (milli)</option>
-      <option value=""> </option>
-      <option value="k">k (kilo)</option>
-      <option value="M">M (mega)</option>
-    </select>
-  `;
+  if (t === "voltage") {
+    html = `
+      <input id="a" placeholder="P (Watt)">
+      <input id="b" placeholder="I (Ampere)">
+    `;
+  }
+
+  if (t === "current") {
+    html = `
+      <input id="a" placeholder="P (Watt)">
+      <input id="b" placeholder="U (Volt)">
+    `;
+  }
+
+  if (t === "resistance") {
+    html = `
+      <input id="a" placeholder="U (Volt)">
+      <input id="b" placeholder="I (Ampere)">
+    `;
+  }
 
   document.getElementById("inputs").innerHTML = html;
-  document.getElementById("output").innerText = "";
 }
 
-function calculate() {
+function calc() {
+  let t = document.getElementById("type").value;
+  let a = parseFloat(document.getElementById("a").value);
+  let b = parseFloat(document.getElementById("b").value);
+  let r = 0;
 
-  let type = document.getElementById("type").value;
+  if (t === "power") r = a * b;
+  if (t === "voltage") r = a / b;
+  if (t === "current") r = a / b;
+  if (t === "resistance") r = a / b;
 
-  let a = convert(
-    parseFloat(document.getElementById("a_val").value),
-    document.getElementById("a_unit").value
-  );
-
-  let b = convert(
-    parseFloat(document.getElementById("b_val").value),
-    document.getElementById("b_unit").value
-  );
-
-  let result = 0;
-  let text = "";
-
-  if(type === "power") {
-    result = a * b;
-    text = "P = " + result + " W";
-  }
-
-  if(type === "voltage") {
-    result = a / b;
-    text = "U = " + result + " V";
-  }
-
-  if(type === "current") {
-    result = a / b;
-    text = "I = " + result + " A";
-  }
-
-  if(type === "resistance") {
-    result = a / b;
-    text = "R = " + result + " Ω";
-  }
-
-  document.getElementById("output").innerText = text;
+  document.getElementById("out").innerText = "Ergebnis: " + r;
 }
 
-renderInputs();
+render();
 
 </script>
-
-</body>
-</html>
-  </script>
 
 </body>
 </html>
