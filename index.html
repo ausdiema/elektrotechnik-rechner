@@ -2,7 +2,7 @@
 <html lang="en" id="htmlRoot">
 <head>
     <meta charset="UTF-8">
-    <title>EngiCalc Pro – The Engineering Suite</title>
+    <title>EngiCalc Pro – Expert Engineering Suite</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,158 +13,196 @@
         }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s; }
         .glow-result { text-shadow: 0 0 15px rgba(37, 99, 235, 0.4); }
         .kb-text h3 { @apply font-bold text-slate-800 dark:text-slate-200 mt-4 mb-1 text-xs uppercase; }
-        .kb-text p { @apply text-[12px] text-slate-500 leading-relaxed mb-2; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .kb-text p { @apply text-[11px] text-slate-500 leading-relaxed mb-2; }
+        .color-dot { @apply w-6 h-6 rounded-full cursor-pointer border border-slate-200 dark:border-slate-700 hover:scale-110 transition active:ring-2 active:ring-brand-600; }
+        
+        /* Resistor Graphic */
+        .resistor-body { background: #d1b894; height: 30px; width: 120px; border-radius: 15px; position: relative; display: flex; justify-content: space-around; align-items: center; padding: 0 15px; margin: 20px auto; }
+        .resistor-lead { position: absolute; background: #94a3b8; height: 4px; width: 160px; z-index: -1; left: -20px; top: 13px; }
+        .band { height: 100%; width: 8px; transition: background 0.3s; }
+
+        @media print { .no-print { display: none; } .print-only { display: block; } }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen transition-colors">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen">
 
-<header class="max-w-6xl mx-auto p-6 flex justify-between items-center">
+<div id="sidebar" class="fixed right-0 top-0 h-full w-64 bg-white dark:bg-slate-900 shadow-2xl translate-x-full transition-transform z-50 p-6 border-l dark:border-slate-800 no-print">
+    <div class="flex justify-between items-center mb-6">
+        <h3 class="font-bold uppercase text-xs tracking-widest">History</h3>
+        <button onclick="toggleSidebar()" class="text-slate-400 hover:text-red-500">✕</button>
+    </div>
+    <div id="history-list" class="space-y-3 overflow-y-auto max-h-[80vh] text-[11px] font-mono"></div>
+    <button onclick="clearHistory()" class="mt-6 w-full py-2 text-[10px] uppercase font-bold text-slate-400 hover:text-red-500 transition">Clear History</button>
+</div>
+
+<header class="max-w-6xl mx-auto p-6 flex justify-between items-center no-print">
     <div class="flex items-center space-x-2">
         <div class="bg-brand-600 p-2 rounded-lg shadow-lg">
             <span class="text-white text-2xl">⚡</span>
         </div>
-        <div>
-            <h1 class="text-2xl font-bold tracking-tight uppercase italic">EngiCalc <span class="text-brand-600">Pro</span></h1>
-        </div>
+        <h1 class="text-2xl font-bold tracking-tight uppercase italic">EngiCalc <span class="text-brand-600">Pro</span></h1>
     </div>
     <div class="flex space-x-2">
-        <button onclick="sharePage()" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-brand-600 transition">🔗</button>
+        <button onclick="window.print()" title="Download PDF/Print" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-brand-600 transition">📄</button>
+        <button onclick="toggleSidebar()" title="Calculation History" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-brand-600 transition">📜</button>
         <button onclick="toggleDark()" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:scale-105 transition">
             <span class="dark:hidden">🌙</span><span class="hidden dark:block">☀️</span>
         </button>
     </div>
 </header>
 
-<main class="max-w-6xl mx-auto p-6">
-    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 items-start">
-
-        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
-            <div class="mb-4">
-                <h2 class="text-xl font-bold text-brand-600">Ohm's Law</h2>
-                <code class="text-[10px] font-bold opacity-70 italic">V = I × R | P = V × I</code>
-            </div>
-            
-            <div class="space-y-4 mb-6">
-                <select id="ohm_m" onchange="renderOhm()" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-bold">
-                    <option value="UI">Solve for R & P (Given V, I)</option>
-                    <option value="UR">Solve for I & P (Given V, R)</option>
-                    <option value="IR">Solve for V & P (Given I, R)</option>
-                </select>
-                <div id="ohm-inputs" class="space-y-4"></div>
-                <div class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800">
-                    <span class="text-[10px] font-bold text-brand-600 uppercase block mb-1 tracking-widest">Calculated Result</span>
-                    <div id="ohm-res" class="text-lg font-mono font-bold glow-result">—</div>
-                </div>
-            </div>
-
-            <hr class="border-slate-100 dark:border-slate-800 my-4">
-            
-            <div class="kb-text">
-                <h3 class="text-brand-600">What is Ohm's Law?</h3>
-                <p>Ohm's Law is the foundation of electrical engineering, establishing the linear relationship between <strong>Voltage (V)</strong>, <strong>Current (I)</strong>, and <strong>Resistance (R)</strong>. Discovered by Georg Simon Ohm, it states that the current through a conductor between two points is directly proportional to the voltage across them.</p>
-                <h3>Common Applications</h3>
-                <p>Engineers use this daily for circuit design, determining the correct resistor for an LED, and calculating the power consumption of household appliances. It is essential for analyzing both DC and AC circuits in electrical prototyping.</p>
-            </div>
+<main class="max-w-7xl mx-auto p-6 grid gap-8 md:grid-cols-2 lg:grid-cols-3 items-start">
+    
+    <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
+        <h2 class="text-xl font-bold text-brand-600 mb-1">Color Code</h2>
+        <p class="text-[10px] text-slate-400 uppercase font-bold mb-4 italic">4-Band Resistor Guide</p>
+        
+        <div class="resistor-body no-print">
+            <div class="resistor-lead"></div>
+            <div id="band1" class="band rounded-sm"></div>
+            <div id="band2" class="band rounded-sm"></div>
+            <div id="band3" class="band rounded-sm"></div>
+            <div id="band4" class="band rounded-sm ml-4"></div>
         </div>
 
-        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
-            <div class="mb-4">
-                <h2 class="text-xl font-bold text-brand-600">Voltage Drop</h2>
-                <code class="text-[10px] font-bold opacity-70 italic">ΔV = (2·L·I) / (κ·A)</code>
-            </div>
-            
-            <div class="space-y-4 mb-6" id="vd-inputs"></div>
-            
-            <div class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800">
-                <span class="text-[10px] font-bold text-brand-600 uppercase block mb-1 tracking-widest">Calculated Drop (ΔV)</span>
-                <div id="vd-res" class="text-lg font-mono font-bold glow-result">—</div>
-            </div>
-
-            <hr class="border-slate-100 dark:border-slate-800 my-4">
-
-            <div class="kb-text">
-                <h3 class="text-brand-600">Understanding Voltage Drop</h3>
-                <p>Voltage drop refers to the reduction in <strong>potential difference</strong> as electric current moves through the passive elements (wires) of an electrical circuit. High resistance in long cables leads to energy loss as heat, reducing the voltage available to the load.</p>
-                <h3>Cable Sizing & Safety</h3>
-                <p>Calculating voltage drop is crucial for electrical installations to comply with safety standards (like DIN VDE). It ensures that motors and electronics receive sufficient power. Key factors include <strong>conductor length</strong>, <strong>cross-sectional area</strong>, and <strong>material conductivity (κ)</strong>.</p>
-            </div>
+        <div id="color-selectors" class="space-y-4 mb-6">
+            <div id="b1-select"></div>
+            <div id="b2-select"></div>
+            <div id="b3-select"></div>
+            <div id="b4-select"></div>
         </div>
 
-        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
-            <h2 class="text-xl font-bold text-brand-600 mb-6">Unit Converter</h2>
-            <div class="space-y-6">
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1 tracking-widest">Power: HP to kW</label>
-                    <div class="space-y-2">
-                        <input id="hp" type="number" placeholder="Horsepower" oninput="unitConv('hp')" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono">
-                        <input id="kw" type="number" placeholder="Kilowatts" oninput="unitConv('kw')" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono">
-                    </div>
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1 tracking-widest">Temperature: °C to °F</label>
-                    <div class="flex space-x-2">
-                        <input id="c" type="number" placeholder="°C" oninput="unitConv('c')" class="w-1/2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono text-center">
-                        <input id="f" type="number" placeholder="°F" oninput="unitConv('f')" class="w-1/2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono text-center">
-                    </div>
-                </div>
-            </div>
+        <div class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800">
+            <span class="text-[10px] font-bold text-brand-600 uppercase block mb-1">Resistance</span>
+            <div id="resistor-res" class="text-lg font-mono font-bold glow-result">Select Colors</div>
         </div>
     </div>
+
+    <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
+        <h2 class="text-xl font-bold text-brand-600">Ohm's Law</h2>
+        <select id="ohm_m" onchange="renderOhm()" class="w-full mt-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-bold no-print">
+            <option value="UI">Solve for R & P (Given V, I)</option>
+            <option value="UR">Solve for I & P (Given V, R)</option>
+            <option value="IR">Solve for V & P (Given I, R)</option>
+        </select>
+        <div id="ohm-inputs" class="space-y-4 my-6"></div>
+        <div id="ohm-res" class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-lg font-mono font-bold glow-result">—</div>
+        <div class="kb-text mt-4 opacity-50 no-print">
+            <p>Relationship between <strong>Voltage</strong>, <strong>Current</strong>, and <strong>Resistance</strong>.</p>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
+        <h2 class="text-xl font-bold text-brand-600 mb-4">Voltage Drop</h2>
+        <div id="vd-inputs" class="space-y-4 mb-6"></div>
+        <div id="vd-res" class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-lg font-mono font-bold glow-result">—</div>
+        <div class="kb-text mt-4 opacity-50 no-print">
+            <p>Calculate loss over cable length (L) based on cross-section (A).</p>
+        </div>
+    </div>
+
 </main>
 
-<footer class="max-w-6xl mx-auto p-12 text-center text-slate-400 text-[11px] font-mono border-t border-slate-100 dark:border-slate-800 mt-12">
-    <p class="uppercase font-bold mb-2">Technical Engineering Constants</p>
-    <p>κ Copper: 56 MS/m | κ Aluminum: 35 MS/m | Gravity: 9.81 m/s² | Speed of Light: 299,792,458 m/s</p>
+<footer class="max-w-6xl mx-auto p-12 text-center text-slate-400 text-[10px] font-mono no-print">
+    <p>κ Copper: 56 MS/m | g: 9.81 m/s² | Designed for Professional Engineering</p>
 </footer>
 
 <script>
-// Logic remains robust with extended prefix support
-if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    document.documentElement.classList.add('dark');
-}
+// --- CORE UI ---
 function toggleDark() {
     document.documentElement.classList.toggle('dark');
     localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
 }
+if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
 
-function sharePage() {
-    navigator.clipboard.writeText(window.location.href);
-    alert("Share link copied to clipboard!");
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('translate-x-full'); renderHistory(); }
+
+// --- HISTORY LOGIC ---
+function saveToHistory(calc) {
+    let history = JSON.parse(localStorage.getItem('engiHistory') || '[]');
+    history.unshift({ time: new Date().toLocaleTimeString(), text: calc });
+    if(history.length > 10) history.pop();
+    localStorage.setItem('engiHistory', JSON.stringify(history));
 }
 
-function convert(v, u) {
-    if (isNaN(v)) return 0;
+function renderHistory() {
+    const list = document.getElementById('history-list');
+    const history = JSON.parse(localStorage.getItem('engiHistory') || '[]');
+    list.innerHTML = history.map(h => `<div class="p-2 border-b dark:border-slate-800"><span class="text-brand-600 block">[${h.time}]</span>${h.text}</div>`).join('');
+}
+function clearHistory() { localStorage.removeItem('engiHistory'); renderHistory(); }
+
+// --- COLOR CODE CALCULATOR ---
+const colors = [
+    { name: 'Black', val: 0, mult: 1, tol: null, hex: '#000000' },
+    { name: 'Brown', val: 1, mult: 10, tol: 1, hex: '#8B4513' },
+    { name: 'Red', val: 2, mult: 100, tol: 2, hex: '#FF0000' },
+    { name: 'Orange', val: 3, mult: 1000, tol: null, hex: '#FFA500' },
+    { name: 'Yellow', val: 4, mult: 10000, tol: null, hex: '#FFFF00' },
+    { name: 'Green', val: 5, mult: 100000, tol: 0.5, hex: '#008000' },
+    { name: 'Blue', val: 6, mult: 1000000, tol: 0.25, hex: '#0000FF' },
+    { name: 'Violet', val: 7, mult: 10000000, tol: 0.1, hex: '#EE82EE' },
+    { name: 'Grey', val: 8, mult: null, tol: 0.05, hex: '#808080' },
+    { name: 'White', val: 9, mult: null, tol: null, hex: '#FFFFFF' },
+    { name: 'Gold', val: null, mult: 0.1, tol: 5, hex: '#D4AF37' },
+    { name: 'Silver', val: null, mult: 0.01, tol: 10, hex: '#C0C0C0' }
+];
+
+let selection = [0, 0, 1, 10]; // Indices
+
+function setupColorPicker() {
+    const labels = ['Digit 1', 'Digit 2', 'Multiplier', 'Tolerance'];
+    labels.forEach((label, i) => {
+        let html = `<label class="text-[9px] font-bold uppercase text-slate-400 mb-1 block">${label}</label><div class="flex flex-wrap gap-2">`;
+        colors.forEach((c, idx) => {
+            if(i < 2 && c.val === null) return;
+            if(i === 2 && c.mult === null) return;
+            if(i === 3 && c.tol === null) return;
+            html += `<div onclick="selectColor(${i}, ${idx})" class="color-dot" style="background:${c.hex}" title="${c.name}"></div>`;
+        });
+        document.getElementById(`b${i+1}-select`).innerHTML = html + `</div>`;
+    });
+}
+
+function selectColor(band, idx) {
+    selection[band] = idx;
+    updateResistor();
+}
+
+function updateResistor() {
+    const b1 = colors[selection[0]], b2 = colors[selection[1]], b3 = colors[selection[2]], b4 = colors[selection[3]];
+    
+    document.getElementById('band1').style.background = b1.hex;
+    document.getElementById('band2').style.background = b2.hex;
+    document.getElementById('band3').style.background = b3.hex;
+    document.getElementById('band4').style.background = b4.hex;
+
+    const val = (b1.val * 10 + b2.val) * b3.mult;
+    let displayVal = val >= 1e6 ? (val/1e6).toFixed(2)+' MΩ' : (val >= 1e3 ? (val/1e3).toFixed(2)+' kΩ' : val.toFixed(1)+' Ω');
+    const resultText = `${displayVal} ±${b4.tol}%`;
+    document.getElementById('resistor-res').innerText = resultText;
+}
+
+// --- CALCULATION LOGIC ---
+function convert(v, u) { 
     const f = { 'p':1e-12, 'n':1e-9, 'µ':1e-6, 'm':1e-3, 'k':1e3, 'M':1e6, 'G':1e9, 'T':1e12 };
-    return f[u] ? v * f[u] : v;
+    return f[u] ? v * f[u] : v; 
 }
-
 function field(id, label, icon, fn) {
-    return `<div>
-        <label class="text-[10px] font-bold text-slate-400 uppercase block ml-1 mb-1 tracking-tight">${label}</label>
-        <div class="flex space-x-2">
-            <div class="relative flex-grow">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 opacity-60">${icon}</span>
-                <input id="${id}" type="number" step="any" placeholder="0.00" oninput="${fn}" class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono focus:ring-2 focus:ring-brand-600 transition">
-            </div>
-            <select id="${id}_u" onchange="${fn}" class="w-16 p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-[10px] font-bold outline-none border-none">
-                <option value="">—</option>
-                <option value="p">p</option><option value="n">n</option><option value="µ">µ</option>
-                <option value="m">m</option><option value="k">k</option><option value="M">M</option>
-                <option value="G">G</option><option value="T">T</option>
-            </select>
-        </div>
-    </div>`;
+    return `<div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1 tracking-tight">${label}</label>
+    <div class="flex space-x-2"><div class="relative flex-grow">
+    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 opacity-60">${icon}</span>
+    <input id="${id}" type="number" step="any" placeholder="0.00" oninput="${fn}" class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono">
+    </div><select id="${id}_u" onchange="${fn}" class="w-16 p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-[10px] font-bold outline-none border-none">
+    <option value="">—</option><option value="m">m</option><option value="k">k</option><option value="M">M</option></select></div></div>`;
 }
-
 function getVal(id) { return convert(parseFloat(document.getElementById(id).value), document.getElementById(id+"_u").value); }
 
 function renderOhm() {
-    let m = document.getElementById("ohm_m").value;
-    let h = "";
+    let m = document.getElementById("ohm_m").value, h = "";
     if(m==="UI") { h+=field("o_u","Voltage (V)","🔌","calcOhm()"); h+=field("o_i","Current (I)","🚀","calcOhm()"); }
     else if(m==="UR") { h+=field("o_u","Voltage (V)","🔌","calcOhm()"); h+=field("o_r","Resistance (Ω)","🚧","calcOhm()"); }
     else if(m==="IR") { h+=field("o_i","Current (I)","🚀","calcOhm()"); h+=field("o_r","Resistance (Ω)","🚧","calcOhm()"); }
@@ -172,36 +210,23 @@ function renderOhm() {
 }
 
 function calcOhm() {
-    let m = document.getElementById("ohm_m").value; let res = "—";
-    if(m==="UI") { let u=getVal("o_u"), i=getVal("o_i"); if(u&&i) res=`R: ${(u/i).toFixed(3)} Ω | P: ${(u*i).toFixed(3)} W`; }
-    else if(m==="UR") { let u=getVal("o_u"), r=getVal("o_r"); if(u&&r) res=`I: ${(u/r).toFixed(3)} A | P: ${(u*(u/r)).toFixed(3)} W`; }
-    else if(m==="IR") { let i=getVal("o_i"), r=getVal("o_r"); if(i&&r) res=`V: ${(i*r).toFixed(3) } V | P: ${(i*i*r).toFixed(3)} W`; }
-    document.getElementById("ohm-res").innerText = res;
+    let m = document.getElementById("ohm_m").value; let res = "";
+    if(m==="UI") { let u=getVal("o_u"), i=getVal("o_i"); if(u&&i) res=`R: ${(u/i).toFixed(2)}Ω | P: ${(u*i).toFixed(2)}W`; }
+    else if(m==="UR") { let u=getVal("o_u"), r=getVal("o_r"); if(u&&r) res=`I: ${(u/r).toFixed(2)}A | P: ${(u**2/r).toFixed(2)}W`; }
+    else if(m==="IR") { let i=getVal("o_i"), r=getVal("o_r"); if(i&&r) res=`V: ${(i*r).toFixed(2)}V | P: ${(i**2*r).toFixed(2)}W`; }
+    if(res) { document.getElementById("ohm-res").innerText = res; saveToHistory("Ohm: " + res); }
 }
 
 function renderVD() {
-    let h = field("vd_i","Current (A)","🚀","calcVD()");
-    h += field("vd_l","Length (m)","📏","calcVD()");
-    h += field("vd_a","Cross-section (mm²)","⬛","calcVD()");
-    h += `<div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1 ml-1">κ (Copper=56, Alum=35)</label>
-          <input id="vd_k" type="number" value="56" oninput="calcVD()" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono focus:ring-2 focus:ring-brand-600 transition"></div>`;
-    document.getElementById("vd-inputs").innerHTML = h;
+    document.getElementById("vd-inputs").innerHTML = field("vd_i","Current (A)","🚀","calcVD()") + field("vd_l","Length (m)","📏","calcVD()") + field("vd_a","Cross-section (mm²)","⬛","calcVD()");
 }
 
 function calcVD() {
-    let i=getVal("vd_i"), l=getVal("vd_l"), a=getVal("vd_a"), k=parseFloat(document.getElementById("vd_k").value);
-    if(i && l && a && k) document.getElementById("vd-res").innerText = `ΔV: ${((2*l*i)/(k*a)).toFixed(4)} V`;
-    else document.getElementById("vd-res").innerText = "—";
+    let i=getVal("vd_i"), l=getVal("vd_l"), a=getVal("vd_a");
+    if(i && l && a) { let v = ((2*l*i)/(56*a)).toFixed(4); document.getElementById("vd-res").innerText = `ΔV: ${v} V`; saveToHistory("Drop: " + v + "V"); }
 }
 
-function unitConv(type) {
-    if(type==='hp') document.getElementById('kw').value = (document.getElementById('hp').value * 0.7457).toFixed(3);
-    if(type==='kw') document.getElementById('hp').value = (document.getElementById('kw').value / 0.7457).toFixed(3);
-    if(type==='c') document.getElementById('f').value = (document.getElementById('c').value * 9/5 + 32).toFixed(1);
-    if(type==='f') document.getElementById('c').value = ((document.getElementById('f').value - 32) * 5/9).toFixed(1);
-}
-
-renderOhm(); renderVD();
+setupColorPicker(); updateResistor(); renderOhm(); renderVD();
 </script>
 </body>
 </html>
