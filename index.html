@@ -2,288 +2,165 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Elektrotechnik Rechner Pro</title>
+<title>Elektrotechnik Rechner</title>
+
+<!-- Inter Font -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+tailwind.config = {
+  darkMode: 'class'
+}
+</script>
 
 <style>
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial;
-  background: linear-gradient(180deg,#f5f5f7,#eaeaec);
-  color: #1d1d1f;
-}
-
-header {
-  text-align: center;
-  padding: 50px 20px 20px;
-}
-
-header h1 {
-  font-size: 38px;
-  margin-bottom: 10px;
-}
-
-header p {
-  color: #6e6e73;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 20px;
-  padding: 20px;
-  max-width: 1100px;
-  margin: auto;
-}
-
-.card {
-  background: white;
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-  transition: 0.25s;
-}
-
-.card:hover {
-  transform: translateY(-6px);
-}
-
-h3 {
-  margin-top: 0;
-}
-
-label {
-  margin-top: 10px;
-  display: block;
-  font-weight: 600;
-}
-
-input, select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 6px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-}
-
-input:focus, select:focus {
-  outline: none;
-  border-color: #0071e3;
-}
-
-.result {
-  margin-top: 15px;
-  font-weight: bold;
-  white-space: pre-line;
-  font-size: 16px;
-  color: #0071e3;
-}
-
-.footer {
-  text-align: center;
-  margin-top: 30px;
-  color: gray;
-  font-size: 12px;
+  font-family: 'Inter', sans-serif;
 }
 </style>
 </head>
 
-<body>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white transition">
 
-<header>
-  <h1>⚡ Elektrotechnik Rechner</h1>
-  <p>Moderne Tools für Studium & Praxis</p>
+<!-- HEADER -->
+<header class="p-6 text-center relative">
+  <h1 class="text-3xl font-semibold">⚡ Elektrotechnik Rechner</h1>
+  
+  <button onclick="toggleDark()" 
+    class="absolute right-6 top-6 px-3 py-1 rounded-lg bg-gray-200 dark:bg-gray-700">
+    🌙
+  </button>
 </header>
 
-<div class="grid">
+<!-- GRID -->
+<div class="grid gap-6 p-6 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
 
-<!-- OHM -->
-<div class="card">
-<h3>Ohm Gesetz</h3>
+  <!-- CARD -->
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5">
+    
+    <h2 class="text-xl font-semibold mb-3">Ohm Gesetz</h2>
 
-<label>Was ist gegeben?</label>
-<select id="mode1" onchange="renderOhm()">
-  <option value="UI">Gegeben: U & I</option>
-  <option value="UR">Gegeben: U & R</option>
-  <option value="IR">Gegeben: I & R</option>
-</select>
+    <label class="text-sm text-gray-500">Was ist gegeben?</label>
+    <select id="mode" onchange="render()" 
+      class="w-full mt-1 p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
+      <option value="UI">Gegeben: U & I</option>
+      <option value="UR">Gegeben: U & R</option>
+      <option value="IR">Gegeben: I & R</option>
+    </select>
 
-<div id="ohmInputs"></div>
-<div class="result" id="ohmOut"></div>
-</div>
+    <div id="inputs" class="mt-3 space-y-3"></div>
 
-<!-- LEISTUNG -->
-<div class="card">
-<h3>Leistung</h3>
+    <div id="result" 
+      class="mt-4 font-semibold text-blue-500"></div>
 
-<label>Was ist gegeben?</label>
-<select id="mode2" onchange="renderPower()">
-  <option value="UI">Gegeben: U & I</option>
-  <option value="PU">Gegeben: P & U</option>
-  <option value="PI">Gegeben: P & I</option>
-</select>
+  </div>
 
-<div id="powerInputs"></div>
-<div class="result" id="powerOut"></div>
-</div>
-
-<!-- ENERGIE -->
-<div class="card">
-<h3>Energie</h3>
-
-<label>Was ist gegeben?</label>
-<select id="mode3" onchange="renderEnergy()">
-  <option value="PT">Gegeben: P & t</option>
-  <option value="EP">Gegeben: E & P</option>
-</select>
-
-<div id="energyInputs"></div>
-<div class="result" id="energyOut"></div>
-</div>
-
-</div>
-
-<div class="footer">
-  © 2026 Elektrotechnik Tools
 </div>
 
 <script>
 
-// Präfixe erweitert
-function conv(val, p) {
-  if (isNaN(val)) return NaN;
-  if (p === "µ") return val * 0.000001;
-  if (p === "m") return val * 0.001;
-  if (p === "k") return val * 1000;
-  if (p === "M") return val * 1000000;
-  if (p === "G") return val * 1000000000;
-  return val;
+// Dark Mode
+function toggleDark(){
+  document.body.classList.toggle("dark");
 }
 
-function field(id, label, unit) {
+// Präfix
+function convert(v,p){
+  if(p==="µ") return v*1e-6;
+  if(p==="m") return v*1e-3;
+  if(p==="k") return v*1e3;
+  if(p==="M") return v*1e6;
+  return v;
+}
+
+// Input Feld
+function field(id,label){
   return `
-  <label>${label}</label>
-  <input id="${id}" type="number" oninput="calcAll()">
-  <select id="${id}_p" onchange="calcAll()">
-    <option value="">${unit}</option>
-    <option value="µ">µ${unit}</option>
-    <option value="m">m${unit}</option>
-    <option value="k">k${unit}</option>
-    <option value="M">M${unit}</option>
-    <option value="G">G${unit}</option>
-  </select>`;
+  <div>
+    <input id="${id}" placeholder="${label}"
+      oninput="calc()"
+      class="w-full p-2 rounded-lg bg-gray-100 dark:bg-gray-700 shadow-inner">
+    
+    <select id="${id}_p" onchange="calc()"
+      class="w-full mt-1 p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
+      <option value="">Basis</option>
+      <option value="µ">µ</option>
+      <option value="m">m</option>
+      <option value="k">k</option>
+      <option value="M">M</option>
+    </select>
+  </div>`;
 }
 
+// Wert holen
 function get(id){
-  return conv(
+  return convert(
     parseFloat(document.getElementById(id).value),
     document.getElementById(id+"_p").value
   );
 }
 
-//////////////// OHM //////////////////
-function renderOhm(){
-  let m=document.getElementById("mode1").value;
+// Render Inputs
+function render(){
+  let m=document.getElementById("mode").value;
   let h="";
-  if(m==="UI"){ h+=field("u1","Spannung U","V")+field("i1","Strom I","A"); }
-  if(m==="UR"){ h+=field("u1","Spannung U","V")+field("r1","Widerstand R","Ω"); }
-  if(m==="IR"){ h+=field("i1","Strom I","A")+field("r1","Widerstand R","Ω"); }
-  document.getElementById("ohmInputs").innerHTML=h;
-  calcAll();
+
+  if(m==="UI"){
+    h+=field("u","Spannung U (V)");
+    h+=field("i","Strom I (A)");
+  }
+
+  if(m==="UR"){
+    h+=field("u","Spannung U (V)");
+    h+=field("r","Widerstand R (Ω)");
+  }
+
+  if(m==="IR"){
+    h+=field("i","Strom I (A)");
+    h+=field("r","Widerstand R (Ω)");
+  }
+
+  document.getElementById("inputs").innerHTML=h;
 }
 
-function calcOhm(){
-  let m=document.getElementById("mode1").value;
-  let o="";
+// Berechnung
+function calc(){
+  let m=document.getElementById("mode").value;
+  let out="";
+
   if(m==="UI"){
-    let u=get("u1"), i=get("i1");
+    let u=get("u"), i=get("i");
     if(u && i){
-      o+="R = "+(u/i).toFixed(4)+" Ω\n";
-      o+="P = "+(u*i).toFixed(4)+" W";
+      out=`R = ${(u/i).toFixed(3)} Ω<br>
+           P = ${(u*i).toFixed(3)} W`;
     }
   }
+
   if(m==="UR"){
-    let u=get("u1"), r=get("r1");
+    let u=get("u"), r=get("r");
     if(u && r){
       let i=u/r;
-      o+="I = "+i.toFixed(4)+" A\n";
-      o+="P = "+(u*i).toFixed(4)+" W";
+      out=`I = ${i.toFixed(3)} A<br>
+           P = ${(u*i).toFixed(3)} W`;
     }
   }
+
   if(m==="IR"){
-    let i=get("i1"), r=get("r1");
+    let i=get("i"), r=get("r");
     if(i && r){
-      let u=r*i;
-      o+="U = "+u.toFixed(4)+" V\n";
-      o+="P = "+(u*i).toFixed(4)+" W";
+      let u=i*r;
+      out=`U = ${u.toFixed(3)} V<br>
+           P = ${(u*i).toFixed(3)} W`;
     }
   }
-  document.getElementById("ohmOut").innerText=o;
+
+  document.getElementById("result").innerHTML=out;
 }
 
-//////////////// POWER //////////////////
-function renderPower(){
-  let m=document.getElementById("mode2").value;
-  let h="";
-  if(m==="UI"){ h+=field("u2","Spannung U","V")+field("i2","Strom I","A"); }
-  if(m==="PU"){ h+=field("p2","Leistung P","W")+field("u2","Spannung U","V"); }
-  if(m==="PI"){ h+=field("p2","Leistung P","W")+field("i2","Strom I","A"); }
-  document.getElementById("powerInputs").innerHTML=h;
-  calcAll();
-}
-
-function calcPower(){
-  let m=document.getElementById("mode2").value;
-  let o="";
-  if(m==="UI"){
-    let u=get("u2"), i=get("i2");
-    if(u && i) o+="P = "+(u*i).toFixed(4)+" W";
-  }
-  if(m==="PU"){
-    let p=get("p2"), u=get("u2");
-    if(p && u) o+="I = "+(p/u).toFixed(4)+" A";
-  }
-  if(m==="PI"){
-    let p=get("p2"), i=get("i2");
-    if(p && i) o+="U = "+(p/i).toFixed(4)+" V";
-  }
-  document.getElementById("powerOut").innerText=o;
-}
-
-//////////////// ENERGY //////////////////
-function renderEnergy(){
-  let m=document.getElementById("mode3").value;
-  let h="";
-  if(m==="PT"){ h+=field("p3","Leistung P","W")+field("t3","Zeit t","s"); }
-  if(m==="EP"){ h+=field("e3","Energie E","J")+field("p3","Leistung P","W"); }
-  document.getElementById("energyInputs").innerHTML=h;
-  calcAll();
-}
-
-function calcEnergy(){
-  let m=document.getElementById("mode3").value;
-  let o="";
-  if(m==="PT"){
-    let p=get("p3"), t=get("t3");
-    if(p && t) o+="E = "+(p*t).toFixed(4)+" J";
-  }
-  if(m==="EP"){
-    let e=get("e3"), p=get("p3");
-    if(e && p) o+="t = "+(e/p).toFixed(4)+" s";
-  }
-  document.getElementById("energyOut").innerText=o;
-}
-
-//////////////// LIVE //////////////////
-function calcAll(){
-  calcOhm();
-  calcPower();
-  calcEnergy();
-}
-
-renderOhm();
-renderPower();
-renderEnergy();
+render();
 
 </script>
 
