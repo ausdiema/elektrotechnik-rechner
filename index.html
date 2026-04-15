@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" id="htmlRoot">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>EngiCalc Pro – The Engineering Suite</title>
+    <title>EngiCalc Pro – Cable & Circuit Suite</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -13,223 +13,189 @@
         }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s; }
+        body { font-family: 'Inter', sans-serif; }
         .glow-result { text-shadow: 0 0 15px rgba(37, 99, 235, 0.4); }
-        .kb-text h3 { @apply font-bold text-slate-800 dark:text-slate-200 mt-4 mb-1 text-xs uppercase; }
-        .kb-text p { @apply text-[11px] text-slate-500 leading-relaxed mb-2; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         
-        /* Resistor Styling */
-        .color-dot { @apply w-7 h-7 rounded-full cursor-pointer border-2 border-transparent hover:scale-110 transition shadow-sm; }
-        .color-dot.active { @apply border-brand-600 ring-2 ring-brand-600 ring-offset-2 dark:ring-offset-slate-900; }
+        /* Sidebar Fix: Verhindert das Blockieren von Klicks */
+        #sidebar { 
+            visibility: hidden; 
+            pointer-events: none; 
+            z-index: 100; 
+            transition: all 0.3s ease-in-out;
+        }
+        #sidebar.open { 
+            visibility: visible; 
+            pointer-events: auto; 
+            transform: translateX(0); 
+        }
         
-        .resistor-body { background: #d1b894; height: 32px; width: 130px; border-radius: 16px; position: relative; display: flex; justify-content: space-around; align-items: center; padding: 0 15px; margin: 25px auto; }
-        .resistor-lead { position: absolute; background: #94a3b8; height: 4px; width: 180px; z-index: -1; left: -25px; top: 14px; }
-        .band { height: 100%; width: 10px; transition: background 0.3s; border-radius: 2px; }
-        
-        /* Sidebar Fix */
-        #sidebar { visibility: hidden; pointer-events: none; z-index: 100; }
-        #sidebar.open { visibility: visible; pointer-events: auto; transform: translateX(0); }
-        
-        /* Sicherstellen, dass Main-Content klickbar ist */
         main { position: relative; z-index: 10; }
-        @media print { .no-print { display: none; } }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen">
 
-<div id="sidebar" class="fixed right-0 top-0 h-full w-64 bg-white dark:bg-slate-900 shadow-2xl translate-x-full transition-all p-6 border-l dark:border-slate-800 no-print">
+<div id="sidebar" class="fixed right-0 top-0 h-full w-72 bg-white dark:bg-slate-900 shadow-2xl translate-x-full p-6 border-l dark:border-slate-800">
     <div class="flex justify-between items-center mb-6">
-        <h3 class="font-bold uppercase text-xs tracking-widest">History</h3>
-        <button onclick="toggleSidebar()" class="text-slate-400 hover:text-red-500 text-xl">✕</button>
+        <h3 class="font-bold uppercase text-xs tracking-widest text-brand-600">History</h3>
+        <button onclick="toggleSidebar()" class="text-slate-400 hover:text-red-500 text-2xl">✕</button>
     </div>
-    <div id="history-list" class="space-y-3 overflow-y-auto max-h-[80vh] text-[11px] font-mono"></div>
+    <div id="history-list" class="space-y-3 overflow-y-auto max-h-[85vh] text-[11px] font-mono">
+        <p class="text-slate-400 italic">Noch keine Berechnungen...</p>
+    </div>
 </div>
 
-<header class="max-w-6xl mx-auto p-6 flex justify-between items-center no-print">
-    <div class="flex items-center space-x-2">
-        <div class="bg-brand-600 p-2 rounded-lg shadow-lg"><span class="text-white text-2xl">⚡</span></div>
-        <h1 class="text-2xl font-bold tracking-tight uppercase italic">EngiCalc <span class="text-brand-600">Pro</span></h1>
+<header class="max-w-6xl mx-auto p-6 flex justify-between items-center">
+    <div class="flex items-center space-x-3">
+        <div class="bg-brand-600 p-2 rounded-xl shadow-lg shadow-brand-600/20 text-white text-2xl">⚡</div>
+        <h1 class="text-2xl font-black tracking-tighter uppercase italic">EngiCalc <span class="text-brand-600">Pro</span></h1>
     </div>
-    <div class="flex space-x-2">
-        <button onclick="window.print()" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-brand-600 transition">📄</button>
-        <button onclick="toggleSidebar()" class="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-brand-600 transition text-xs font-bold uppercase">📜 History</button>
-        <button onclick="toggleDark()" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 transition text-xl">🌙</button>
+    <div class="flex space-x-3">
+        <button onclick="toggleSidebar()" class="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-[10px] uppercase tracking-wider hover:border-brand-600 transition">📜 History</button>
+        <button onclick="toggleDark()" class="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xl">🌙</button>
     </div>
 </header>
 
 <main class="max-w-7xl mx-auto p-6 grid gap-8 md:grid-cols-2 lg:grid-cols-3 items-start">
     
-    <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
-        <div class="mb-2">
-            <h2 class="text-xl font-bold text-brand-600">Color Code</h2>
-            <code class="text-[10px] font-bold opacity-70 italic">4-Band Resistor Standard</code>
+    <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 hover:-translate-y-1 transition-all">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-brand-600">Cable Section</h2>
+            <span class="text-[10px] bg-brand-100 dark:bg-brand-900/30 text-brand-600 px-2 py-1 rounded-md font-bold uppercase">Safety</span>
         </div>
-
-        <div class="resistor-body no-print">
-            <div class="resistor-lead"></div>
-            <div id="band1" class="band"></div>
-            <div id="band2" class="band"></div>
-            <div id="band3" class="band"></div>
-            <div id="band4" class="band ml-4"></div>
+        <code class="text-[10px] block mb-6 opacity-60">Formula: A = (2 · L · I) / (κ · ΔV_max)</code>
+        
+        <div class="space-y-4 mb-6">
+            <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Power / Current (Amps)</label>
+                <input id="cs_i" type="number" oninput="calcCS()" placeholder="e.g. 16" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono focus:ring-brand-600 transition">
+            </div>
+            <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Cable Length (Meters)</label>
+                <input id="cs_l" type="number" oninput="calcCS()" placeholder="e.g. 25" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono focus:ring-brand-600 transition">
+            </div>
+            <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Allowed Voltage Drop (%)</label>
+                <input id="cs_v" type="number" oninput="calcCS()" value="3" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono focus:ring-brand-600 transition">
+            </div>
         </div>
-
-        <div id="color-selectors" class="space-y-4 mb-6"></div>
 
         <div class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800">
-            <span class="text-[10px] font-bold text-brand-600 uppercase block mb-1 tracking-widest">Resistance Value</span>
-            <div id="resistor-res" class="text-lg font-mono font-bold glow-result">—</div>
+            <span class="text-[10px] font-bold text-brand-600 uppercase block mb-1">Recommended Section</span>
+            <div id="cs-res" class="text-xl font-mono font-bold glow-result">0.00 mm²</div>
         </div>
     </div>
 
-    <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
-        <h2 class="text-xl font-bold text-brand-600">Ohm's Law</h2>
-        <code class="text-[10px] font-bold opacity-70 italic mb-4">Formula: V = R × I | P = V × I</code>
+    <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 hover:-translate-y-1 transition-all">
+        <h2 class="text-xl font-bold text-brand-600 mb-4">Ohm's Law</h2>
         <select id="ohm_m" onchange="renderOhm()" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-bold mb-6">
-            <option value="UI">Solve for R & P (Given V, I)</option>
-            <option value="UR">Solve for I & P (Given V, R)</option>
-            <option value="IR">Solve for V & P (Given I, R)</option>
+            <option value="UI">Get R & P (From V, I)</option>
+            <option value="UR">Get I & P (From V, R)</option>
         </select>
         <div id="ohm-inputs" class="space-y-4 mb-6"></div>
-        <div id="ohm-res" class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-lg font-mono font-bold glow-result">—</div>
-        <div class="kb-text mt-4"><h3>Info</h3><p>Relationship between <strong>Voltage</strong>, <strong>Current</strong>, and <strong>Resistance</strong>.</p></div>
+        <div class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800">
+            <div id="ohm-res" class="text-lg font-mono font-bold glow-result">Enter values...</div>
+        </div>
     </div>
 
-    <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
-        <h2 class="text-xl font-bold text-brand-600">Voltage Drop</h2>
-        <code class="text-[10px] font-bold opacity-70 italic mb-4">Formula: ΔV = (2·L·I) / (κ·A)</code>
-        <div id="vd-inputs" class="space-y-4 mb-6"></div>
-        <div id="vd-res" class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-lg font-mono font-bold glow-result">—</div>
-        <div class="kb-text mt-4"><h3>Info</h3><p>Calculates energy loss over a specific cable length and material conductivity.</p></div>
+    <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 hover:-translate-y-1 transition-all">
+        <h2 class="text-xl font-bold text-brand-600 mb-4">Unit Converter</h2>
+        <div class="space-y-4">
+            <input id="unit_in" type="number" oninput="convertUnits()" placeholder="Value..." class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono">
+            <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
+                <div class="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg">kilo: <span id="u_k">0</span></div>
+                <div class="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg">milli: <span id="u_m">0</span></div>
+                <div class="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg">micro: <span id="u_u">0</span></div>
+                <div class="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg">Mega: <span id="u_M">0</span></div>
+            </div>
+        </div>
     </div>
 
 </main>
 
 <script>
-// --- KONSTANTEN ---
-const colors = [
-    { name: 'Black', val: 0, mult: 1, tol: null, hex: '#000000' },
-    { name: 'Brown', val: 1, mult: 10, tol: 1, hex: '#8B4513' },
-    { name: 'Red', val: 2, mult: 100, tol: 2, hex: '#FF0000' },
-    { name: 'Orange', val: 3, mult: 1000, tol: null, hex: '#FFA500' },
-    { name: 'Yellow', val: 4, mult: 10000, tol: null, hex: '#FFFF00' },
-    { name: 'Green', val: 5, mult: 100000, tol: 0.5, hex: '#008000' },
-    { name: 'Blue', val: 6, mult: 1000000, tol: 0.25, hex: '#0000FF' },
-    { name: 'Violet', val: 7, mult: 10000000, tol: 0.1, hex: '#EE82EE' },
-    { name: 'Grey', val: 8, mult: null, tol: 0.05, hex: '#808080' },
-    { name: 'White', val: 9, mult: null, tol: null, hex: '#FFFFFF' },
-    { name: 'Gold', val: null, mult: 0.1, tol: 5, hex: '#D4AF37' },
-    { name: 'Silver', val: null, mult: 0.01, tol: 10, hex: '#C0C0C0' }
-];
+    function toggleDark() { document.documentElement.classList.toggle('dark'); }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 
-let selection = [1, 0, 2, 10]; // Default: Brown, Black, Red, Gold
+    // --- CABLE SECTION LOGIC ---
+    function calcCS() {
+        const i = parseFloat(document.getElementById('cs_i').value) || 0;
+        const l = parseFloat(document.getElementById('cs_l').value) || 0;
+        const vDropPerc = parseFloat(document.getElementById('cs_v').value) || 3;
+        const kappa = 56; // Copper
+        const u = 230; // System Voltage
+        
+        if (i > 0 && l > 0) {
+            const vDropAllowed = (u * vDropPerc) / 100;
+            const section = (2 * l * i) / (kappa * vDropAllowed);
+            document.getElementById('cs-res').innerText = section.toFixed(2) + " mm²";
+            saveHistory(`Cable: ${section.toFixed(2)}mm² for ${i}A / ${l}m`);
+        }
+    }
 
-// --- COLOR CALCULATOR ---
-function renderColorPicker() {
-    const labels = ['1st Digit', '2nd Digit', 'Multiplier', 'Tolerance'];
-    let html = "";
-    
-    labels.forEach((label, i) => {
-        html += `<div><label class="text-[9px] font-bold text-slate-400 uppercase mb-1 block">${label}</label>`;
-        html += `<div class="flex flex-wrap gap-2">`;
-        colors.forEach((c, idx) => {
-            if((i < 2 && c.val === null) || (i === 2 && c.mult === null) || (i === 3 && c.tol === null)) return;
-            const activeClass = selection[i] === idx ? 'active' : '';
-            html += `<button onclick="updateBand(${i}, ${idx})" class="color-dot ${activeClass}" style="background-color:${c.hex}" title="${c.name}"></button>`;
-        });
-        html += `</div></div>`;
-    });
-    document.getElementById('color-selectors').innerHTML = html;
-}
+    // --- OHM LOGIC ---
+    function renderOhm() {
+        const m = document.getElementById('ohm_m').value;
+        const cont = document.getElementById('ohm-inputs');
+        if(m === 'UI') {
+            cont.innerHTML = `
+                <input id="o_v" type="number" oninput="calcOhm()" placeholder="Voltage (V)" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono">
+                <input id="o_i" type="number" oninput="calcOhm()" placeholder="Current (A)" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono">
+            `;
+        } else {
+            cont.innerHTML = `
+                <input id="o_v" type="number" oninput="calcOhm()" placeholder="Voltage (V)" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono">
+                <input id="o_r" type="number" oninput="calcOhm()" placeholder="Resistance (Ω)" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono">
+            `;
+        }
+    }
 
-function updateBand(bandIdx, colorIdx) {
-    selection[bandIdx] = colorIdx;
-    renderColorPicker(); // UI erneuern
-    updateVisuals();     // Grafik & Wert erneuern
-}
+    function calcOhm() {
+        const m = document.getElementById('ohm_m').value;
+        const v = parseFloat(document.getElementById('o_v')?.value) || 0;
+        const i = parseFloat(document.getElementById('o_i')?.value) || 0;
+        const r = parseFloat(document.getElementById('o_r')?.value) || 0;
+        let res = "";
 
-function updateVisuals() {
-    const b = selection.map(idx => colors[idx]);
-    // Grafik-Bänder färben
-    document.getElementById('band1').style.backgroundColor = b[0].hex;
-    document.getElementById('band2').style.backgroundColor = b[1].hex;
-    document.getElementById('band3').style.backgroundColor = b[2].hex;
-    document.getElementById('band4').style.backgroundColor = b[3].hex;
+        if(m === 'UI' && v && i) res = `R: ${(v/i).toFixed(2)}Ω | P: ${(v*i).toFixed(2)}W`;
+        if(m === 'UR' && v && r) res = `I: ${(v/r).toFixed(2)}A | P: ${(v**2/r).toFixed(2)}W`;
+        
+        if(res) {
+            document.getElementById('ohm-res').innerText = res;
+            saveHistory("Ohm: " + res);
+        }
+    }
 
-    // Berechnung
-    const val = (b[0].val * 10 + b[1].val) * b[2].mult;
-    let disp = val >= 1e6 ? (val/1e6).toFixed(1)+' MΩ' : (val >= 1e3 ? (val/1e3).toFixed(1)+' kΩ' : val.toFixed(0) + ' Ω');
-    document.getElementById('resistor-res').innerText = `${disp} ±${b[3].tol}%`;
-}
+    // --- UNIT CONVERTER ---
+    function convertUnits() {
+        const val = parseFloat(document.getElementById('unit_in').value) || 0;
+        document.getElementById('u_k').innerText = (val / 1000).toExponential(2);
+        document.getElementById('u_m').innerText = (val * 1000).toFixed(2);
+        document.getElementById('u_u').innerText = (val * 1000000).toFixed(0);
+        document.getElementById('u_M').innerText = (val / 1000000).toExponential(2);
+    }
 
-// --- CORE FUNCTIONS ---
-function toggleDark() { document.documentElement.classList.toggle('dark'); }
-function toggleSidebar() { 
-    const s = document.getElementById('sidebar');
-    s.classList.toggle('open');
-    if(s.classList.contains('open')) renderHistory();
-}
+    // --- HISTORY ---
+    function saveHistory(msg) {
+        let h = JSON.parse(localStorage.getItem('engi_history') || '[]');
+        const entry = { t: new Date().toLocaleTimeString(), m: msg };
+        if(h.length > 0 && h[0].m === msg) return;
+        h.unshift(entry);
+        localStorage.setItem('engi_history', JSON.stringify(h.slice(0, 15)));
+        renderHistory();
+    }
 
-function convert(v, u) { 
-    const f = { 'p':1e-12, 'n':1e-9, 'µ':1e-6, 'm':1e-3, 'k':1e3, 'M':1e6, 'G':1e9, 'T':1e12 };
-    return f[u] ? v * f[u] : v; 
-}
+    function renderHistory() {
+        const h = JSON.parse(localStorage.getItem('engi_history') || '[]');
+        document.getElementById('history-list').innerHTML = h.map(x => `
+            <div class="p-2 border-b dark:border-slate-800">
+                <span class="text-brand-600 font-bold">[${x.t}]</span><br>${x.m}
+            </div>
+        `).join('') || '<p class="text-slate-400 italic">Noch keine Berechnungen...</p>';
+    }
 
-function field(id, label, icon, fn) {
-    return `<div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">${label}</label>
-    <div class="flex space-x-2"><div class="relative flex-grow">
-    <span class="absolute left-3 top-1/2 -translate-y-1/2 opacity-50">${icon}</span>
-    <input id="${id}" type="number" step="any" oninput="${fn}" class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono">
-    </div><select id="${id}_u" onchange="${fn}" class="w-16 p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-[10px] font-bold outline-none">
-    <option value="">—</option><option value="m">m</option><option value="k">k</option><option value="M">M</option></select></div></div>`;
-}
-
-function getVal(id) { 
-    const el = document.getElementById(id);
-    if(!el || !el.value) return 0;
-    return convert(parseFloat(el.value), document.getElementById(id+"_u").value); 
-}
-
-function renderOhm() {
-    let m = document.getElementById("ohm_m").value, h = "";
-    if(m==="UI") { h+=field("o_u","Voltage (V)","🔌","calcOhm()"); h+=field("o_i","Current (I)","🚀","calcOhm()"); }
-    else if(m==="UR") { h+=field("o_u","Voltage (V)","🔌","calcOhm()"); h+=field("o_r","Resistance (Ω)","🚧","calcOhm()"); }
-    else if(m==="IR") { h+=field("o_i","Current (I)","🚀","calcOhm()"); h+=field("o_r","Resistance (Ω)","🚧","calcOhm()"); }
-    document.getElementById("ohm-inputs").innerHTML = h;
-}
-
-function calcOhm() {
-    let m = document.getElementById("ohm_m").value, res = "";
-    if(m==="UI") { let u=getVal("o_u"), i=getVal("o_i"); if(u&&i) res=`R: ${(u/i).toFixed(2)}Ω | P: ${(u*i).toFixed(2)}W`; }
-    else if(m==="UR") { let u=getVal("o_u"), r=getVal("o_r"); if(u&&r) res=`I: ${(u/r).toFixed(2)}A | P: ${(u**2/r).toFixed(2)}W`; }
-    else if(m==="IR") { let i=getVal("o_i"), r=getVal("o_r"); if(i&&r) res=`V: ${(i*r).toFixed(2)}V | P: ${(i**2*r).toFixed(2)}W`; }
-    if(res) { document.getElementById("ohm-res").innerText = res; saveToHistory("Ohm: " + res); }
-}
-
-function renderVD() {
-    document.getElementById("vd-inputs").innerHTML = field("vd_i","Current (A)","🚀","calcVD()") + field("vd_l","Length (m)","📏","calcVD()") + field("vd_a","Cross-section (mm²)","⬛","calcVD()");
-}
-
-function calcVD() {
-    let i=getVal("vd_i"), l=getVal("vd_l"), a=getVal("vd_a");
-    if(i && l && a) { let v = ((2*l*i)/(56*a)).toFixed(4); document.getElementById("vd-res").innerText = `ΔV: ${v} V`; saveToHistory("Drop: " + v + "V"); }
-}
-
-function saveToHistory(t) {
-    let h = JSON.parse(localStorage.getItem('engiHistory') || '[]');
-    h.unshift({ time: new Date().toLocaleTimeString(), text: t });
-    localStorage.setItem('engiHistory', JSON.stringify(h.slice(0,10)));
-}
-
-function renderHistory() {
-    const h = JSON.parse(localStorage.getItem('engiHistory') || '[]');
-    document.getElementById('history-list').innerHTML = h.map(i => `<div class="p-2 border-b dark:border-slate-800"><span class="text-brand-600 font-bold">[${i.time}]</span><br>${i.text}</div>`).join('');
-}
-
-// --- INIT ---
-renderColorPicker(); 
-updateVisuals(); 
-renderOhm(); 
-renderVD();
+    renderOhm();
+    renderHistory();
 </script>
 </body>
 </html>
