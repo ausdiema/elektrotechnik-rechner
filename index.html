@@ -1,1 +1,220 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Elektrotechnik Rechner Pro</title>
 
+<style>
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  transition: 0.3s;
+}
+
+.dark {
+  background: #1c1c1e;
+  color: #f5f5f7;
+}
+
+header {
+  text-align: center;
+  padding: 50px 20px;
+}
+
+header h1 {
+  font-size: 40px;
+}
+
+header p {
+  color: gray;
+}
+
+.toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  cursor: pointer;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  max-width: 1100px;
+  margin: auto;
+}
+
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  transition: 0.3s;
+}
+
+.dark .card {
+  background: #2c2c2e;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+h3 {
+  margin-top: 0;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.dark input {
+  background: #3a3a3c;
+  color: white;
+  border: 1px solid #555;
+}
+
+button {
+  margin-top: 12px;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: black;
+  color: white;
+  cursor: pointer;
+}
+
+.result {
+  margin-top: 10px;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="toggle" onclick="toggleMode()">🌙</div>
+
+<header>
+  <h1>⚡ Elektrotechnik Rechner</h1>
+  <p>Moderne Tools für Studium & Praxis</p>
+</header>
+
+<div class="grid">
+
+  <!-- Leistung -->
+  <div class="card">
+    <h3>Leistung (P = U × I)</h3>
+    <input id="u1" placeholder="Spannung (V)">
+    <input id="i1" placeholder="Strom (A)">
+    <button onclick="power()">Berechnen</button>
+    <div class="result" id="out1"></div>
+  </div>
+
+  <!-- Spannung -->
+  <div class="card">
+    <h3>Spannung (U = P / I)</h3>
+    <input id="p2" placeholder="Leistung (W)">
+    <input id="i2" placeholder="Strom (A)">
+    <button onclick="voltage()">Berechnen</button>
+    <div class="result" id="out2"></div>
+  </div>
+
+  <!-- Strom -->
+  <div class="card">
+    <h3>Strom (I = P / U)</h3>
+    <input id="p3" placeholder="Leistung (W)">
+    <input id="u3" placeholder="Spannung (V)">
+    <button onclick="current()">Berechnen</button>
+    <div class="result" id="out3"></div>
+  </div>
+
+  <!-- Widerstand -->
+  <div class="card">
+    <h3>Widerstand (R = U / I)</h3>
+    <input id="u4" placeholder="Spannung (V)">
+    <input id="i4" placeholder="Strom (A)">
+    <button onclick="resistance()">Berechnen</button>
+    <div class="result" id="out4"></div>
+  </div>
+
+  <!-- Energie -->
+  <div class="card">
+    <h3>Energie (E = P × t)</h3>
+    <input id="p5" placeholder="Leistung (W)">
+    <input id="t5" placeholder="Zeit (s)">
+    <button onclick="energy()">Berechnen</button>
+    <div class="result" id="out5"></div>
+  </div>
+
+  <!-- Ohm Gesetz -->
+  <div class="card">
+    <h3>Ohm Gesetz (U = R × I)</h3>
+    <input id="r6" placeholder="Widerstand (Ω)">
+    <input id="i6" placeholder="Strom (A)">
+    <button onclick="ohm()">Berechnen</button>
+    <div class="result" id="out6"></div>
+  </div>
+
+</div>
+
+<script>
+
+function toggleMode() {
+  document.body.classList.toggle("dark");
+}
+
+function power() {
+  let u = parseFloat(document.getElementById("u1").value);
+  let i = parseFloat(document.getElementById("i1").value);
+  let p = u * i;
+  document.getElementById("out1").innerText = "P = " + p.toFixed(2) + " W";
+}
+
+function voltage() {
+  let p = parseFloat(document.getElementById("p2").value);
+  let i = parseFloat(document.getElementById("i2").value);
+  let u = p / i;
+  document.getElementById("out2").innerText = "U = " + u.toFixed(2) + " V";
+}
+
+function current() {
+  let p = parseFloat(document.getElementById("p3").value);
+  let u = parseFloat(document.getElementById("u3").value);
+  let i = p / u;
+  document.getElementById("out3").innerText = "I = " + i.toFixed(2) + " A";
+}
+
+function resistance() {
+  let u = parseFloat(document.getElementById("u4").value);
+  let i = parseFloat(document.getElementById("i4").value);
+  let r = u / i;
+  document.getElementById("out4").innerText = "R = " + r.toFixed(2) + " Ω";
+}
+
+function energy() {
+  let p = parseFloat(document.getElementById("p5").value);
+  let t = parseFloat(document.getElementById("t5").value);
+  let e = p * t;
+  document.getElementById("out5").innerText = "E = " + e.toFixed(2) + " J";
+}
+
+function ohm() {
+  let r = parseFloat(document.getElementById("r6").value);
+  let i = parseFloat(document.getElementById("i6").value);
+  let u = r * i;
+  document.getElementById("out6").innerText = "U = " + u.toFixed(2) + " V";
+}
+
+</script>
+
+</body>
+</html>
