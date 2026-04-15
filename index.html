@@ -8,16 +8,22 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial;
-  background: #f5f5f7;
+  background: linear-gradient(180deg,#f5f5f7,#eaeaec);
+  color: #1d1d1f;
 }
 
 header {
   text-align: center;
-  padding: 50px 20px;
+  padding: 50px 20px 20px;
 }
 
 header h1 {
-  font-size: 36px;
+  font-size: 38px;
+  margin-bottom: 10px;
+}
+
+header p {
+  color: #6e6e73;
 }
 
 .grid {
@@ -31,9 +37,14 @@ header h1 {
 
 .card {
   background: white;
-  padding: 20px;
   border-radius: 20px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  padding: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  transition: 0.25s;
+}
+
+.card:hover {
+  transform: translateY(-6px);
 }
 
 h3 {
@@ -43,32 +54,36 @@ h3 {
 label {
   margin-top: 10px;
   display: block;
-  font-weight: bold;
+  font-weight: 600;
 }
 
 input, select {
   width: 100%;
   padding: 10px;
-  margin-top: 5px;
+  margin-top: 6px;
   border-radius: 10px;
   border: 1px solid #ccc;
+  font-size: 14px;
 }
 
-button {
-  margin-top: 12px;
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  background: black;
-  color: white;
-  cursor: pointer;
+input:focus, select:focus {
+  outline: none;
+  border-color: #0071e3;
 }
 
 .result {
-  margin-top: 10px;
+  margin-top: 15px;
   font-weight: bold;
   white-space: pre-line;
+  font-size: 16px;
+  color: #0071e3;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 30px;
+  color: gray;
+  font-size: 12px;
 }
 </style>
 </head>
@@ -77,6 +92,7 @@ button {
 
 <header>
   <h1>⚡ Elektrotechnik Rechner</h1>
+  <p>Moderne Tools für Studium & Praxis</p>
 </header>
 
 <div class="grid">
@@ -85,6 +101,7 @@ button {
 <div class="card">
 <h3>Ohm Gesetz</h3>
 
+<label>Was ist gegeben?</label>
 <select id="mode1" onchange="renderOhm()">
   <option value="UI">Gegeben: U & I</option>
   <option value="UR">Gegeben: U & R</option>
@@ -92,8 +109,6 @@ button {
 </select>
 
 <div id="ohmInputs"></div>
-
-<button onclick="calcOhm()">Berechnen</button>
 <div class="result" id="ohmOut"></div>
 </div>
 
@@ -101,15 +116,14 @@ button {
 <div class="card">
 <h3>Leistung</h3>
 
+<label>Was ist gegeben?</label>
 <select id="mode2" onchange="renderPower()">
-  <option value="UI">U & I</option>
-  <option value="PU">P & U</option>
-  <option value="PI">P & I</option>
+  <option value="UI">Gegeben: U & I</option>
+  <option value="PU">Gegeben: P & U</option>
+  <option value="PI">Gegeben: P & I</option>
 </select>
 
 <div id="powerInputs"></div>
-
-<button onclick="calcPower()">Berechnen</button>
 <div class="result" id="powerOut"></div>
 </div>
 
@@ -117,39 +131,46 @@ button {
 <div class="card">
 <h3>Energie</h3>
 
+<label>Was ist gegeben?</label>
 <select id="mode3" onchange="renderEnergy()">
-  <option value="PT">P & t</option>
-  <option value="EP">E & P</option>
+  <option value="PT">Gegeben: P & t</option>
+  <option value="EP">Gegeben: E & P</option>
 </select>
 
 <div id="energyInputs"></div>
-
-<button onclick="calcEnergy()">Berechnen</button>
 <div class="result" id="energyOut"></div>
 </div>
 
 </div>
 
+<div class="footer">
+  © 2026 Elektrotechnik Tools
+</div>
+
 <script>
 
-// Präfix
+// Präfixe erweitert
 function conv(val, p) {
   if (isNaN(val)) return NaN;
+  if (p === "µ") return val * 0.000001;
   if (p === "m") return val * 0.001;
   if (p === "k") return val * 1000;
   if (p === "M") return val * 1000000;
+  if (p === "G") return val * 1000000000;
   return val;
 }
 
 function field(id, label, unit) {
   return `
   <label>${label}</label>
-  <input id="${id}" type="number">
-  <select id="${id}_p">
+  <input id="${id}" type="number" oninput="calcAll()">
+  <select id="${id}_p" onchange="calcAll()">
     <option value="">${unit}</option>
+    <option value="µ">µ${unit}</option>
     <option value="m">m${unit}</option>
     <option value="k">k${unit}</option>
     <option value="M">M${unit}</option>
+    <option value="G">G${unit}</option>
   </select>`;
 }
 
@@ -162,30 +183,40 @@ function get(id){
 
 //////////////// OHM //////////////////
 function renderOhm(){
-  let m = document.getElementById("mode1").value;
+  let m=document.getElementById("mode1").value;
   let h="";
-  if(m==="UI"){ h+=field("u1","U","V")+field("i1","I","A"); }
-  if(m==="UR"){ h+=field("u1","U","V")+field("r1","R","Ω"); }
-  if(m==="IR"){ h+=field("i1","I","A")+field("r1","R","Ω"); }
+  if(m==="UI"){ h+=field("u1","Spannung U","V")+field("i1","Strom I","A"); }
+  if(m==="UR"){ h+=field("u1","Spannung U","V")+field("r1","Widerstand R","Ω"); }
+  if(m==="IR"){ h+=field("i1","Strom I","A")+field("r1","Widerstand R","Ω"); }
   document.getElementById("ohmInputs").innerHTML=h;
+  calcAll();
 }
 
 function calcOhm(){
-  let m = document.getElementById("mode1").value;
+  let m=document.getElementById("mode1").value;
   let o="";
   if(m==="UI"){
     let u=get("u1"), i=get("i1");
-    o+="R="+(u/i).toFixed(4)+" Ω\nP="+(u*i).toFixed(4)+" W";
+    if(u && i){
+      o+="R = "+(u/i).toFixed(4)+" Ω\n";
+      o+="P = "+(u*i).toFixed(4)+" W";
+    }
   }
   if(m==="UR"){
     let u=get("u1"), r=get("r1");
-    let i=u/r;
-    o+="I="+i.toFixed(4)+" A\nP="+(u*i).toFixed(4)+" W";
+    if(u && r){
+      let i=u/r;
+      o+="I = "+i.toFixed(4)+" A\n";
+      o+="P = "+(u*i).toFixed(4)+" W";
+    }
   }
   if(m==="IR"){
     let i=get("i1"), r=get("r1");
-    let u=r*i;
-    o+="U="+u.toFixed(4)+" V\nP="+(u*i).toFixed(4)+" W";
+    if(i && r){
+      let u=r*i;
+      o+="U = "+u.toFixed(4)+" V\n";
+      o+="P = "+(u*i).toFixed(4)+" W";
+    }
   }
   document.getElementById("ohmOut").innerText=o;
 }
@@ -194,10 +225,11 @@ function calcOhm(){
 function renderPower(){
   let m=document.getElementById("mode2").value;
   let h="";
-  if(m==="UI"){ h+=field("u2","U","V")+field("i2","I","A"); }
-  if(m==="PU"){ h+=field("p2","P","W")+field("u2","U","V"); }
-  if(m==="PI"){ h+=field("p2","P","W")+field("i2","I","A"); }
+  if(m==="UI"){ h+=field("u2","Spannung U","V")+field("i2","Strom I","A"); }
+  if(m==="PU"){ h+=field("p2","Leistung P","W")+field("u2","Spannung U","V"); }
+  if(m==="PI"){ h+=field("p2","Leistung P","W")+field("i2","Strom I","A"); }
   document.getElementById("powerInputs").innerHTML=h;
+  calcAll();
 }
 
 function calcPower(){
@@ -205,15 +237,15 @@ function calcPower(){
   let o="";
   if(m==="UI"){
     let u=get("u2"), i=get("i2");
-    o+="P="+(u*i).toFixed(4)+" W";
+    if(u && i) o+="P = "+(u*i).toFixed(4)+" W";
   }
   if(m==="PU"){
     let p=get("p2"), u=get("u2");
-    o+="I="+(p/u).toFixed(4)+" A";
+    if(p && u) o+="I = "+(p/u).toFixed(4)+" A";
   }
   if(m==="PI"){
     let p=get("p2"), i=get("i2");
-    o+="U="+(p/i).toFixed(4)+" V";
+    if(p && i) o+="U = "+(p/i).toFixed(4)+" V";
   }
   document.getElementById("powerOut").innerText=o;
 }
@@ -222,9 +254,10 @@ function calcPower(){
 function renderEnergy(){
   let m=document.getElementById("mode3").value;
   let h="";
-  if(m==="PT"){ h+=field("p3","P","W")+field("t3","t","s"); }
-  if(m==="EP"){ h+=field("e3","E","J")+field("p3","P","W"); }
+  if(m==="PT"){ h+=field("p3","Leistung P","W")+field("t3","Zeit t","s"); }
+  if(m==="EP"){ h+=field("e3","Energie E","J")+field("p3","Leistung P","W"); }
   document.getElementById("energyInputs").innerHTML=h;
+  calcAll();
 }
 
 function calcEnergy(){
@@ -232,13 +265,20 @@ function calcEnergy(){
   let o="";
   if(m==="PT"){
     let p=get("p3"), t=get("t3");
-    o+="E="+(p*t).toFixed(4)+" J";
+    if(p && t) o+="E = "+(p*t).toFixed(4)+" J";
   }
   if(m==="EP"){
     let e=get("e3"), p=get("p3");
-    o+="t="+(e/p).toFixed(4)+" s";
+    if(e && p) o+="t = "+(e/p).toFixed(4)+" s";
   }
   document.getElementById("energyOut").innerText=o;
+}
+
+//////////////// LIVE //////////////////
+function calcAll(){
+  calcOhm();
+  calcPower();
+  calcEnergy();
 }
 
 renderOhm();
