@@ -2,7 +2,7 @@
 <html lang="en" id="htmlRoot">
 <head>
     <meta charset="UTF-8">
-    <title>EngiCalc Pro – Expert Engineering Suite</title>
+    <title>EngiCalc Pro – The Engineering Suite</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,13 +18,12 @@
         .kb-text h3 { @apply font-bold text-slate-800 dark:text-slate-200 mt-4 mb-1 text-xs uppercase; }
         .kb-text p { @apply text-[11px] text-slate-500 leading-relaxed mb-2; }
         .color-dot { @apply w-6 h-6 rounded-full cursor-pointer border border-slate-200 dark:border-slate-700 hover:scale-110 transition active:ring-2 active:ring-brand-600; }
-        
-        /* Resistor Graphic */
         .resistor-body { background: #d1b894; height: 30px; width: 120px; border-radius: 15px; position: relative; display: flex; justify-content: space-around; align-items: center; padding: 0 15px; margin: 20px auto; }
         .resistor-lead { position: absolute; background: #94a3b8; height: 4px; width: 160px; z-index: -1; left: -20px; top: 13px; }
         .band { height: 100%; width: 8px; transition: background 0.3s; }
-
-        @media print { .no-print { display: none; } .print-only { display: block; } }
+        #sidebar { pointer-events: none; }
+        #sidebar.open { pointer-events: auto; transform: translateX(0); }
+        @media print { .no-print { display: none; } }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen">
@@ -35,107 +34,64 @@
         <button onclick="toggleSidebar()" class="text-slate-400 hover:text-red-500">✕</button>
     </div>
     <div id="history-list" class="space-y-3 overflow-y-auto max-h-[80vh] text-[11px] font-mono"></div>
-    <button onclick="clearHistory()" class="mt-6 w-full py-2 text-[10px] uppercase font-bold text-slate-400 hover:text-red-500 transition">Clear History</button>
 </div>
 
 <header class="max-w-6xl mx-auto p-6 flex justify-between items-center no-print">
     <div class="flex items-center space-x-2">
-        <div class="bg-brand-600 p-2 rounded-lg shadow-lg">
-            <span class="text-white text-2xl">⚡</span>
-        </div>
+        <div class="bg-brand-600 p-2 rounded-lg shadow-lg"><span class="text-white text-2xl">⚡</span></div>
         <h1 class="text-2xl font-bold tracking-tight uppercase italic">EngiCalc <span class="text-brand-600">Pro</span></h1>
     </div>
     <div class="flex space-x-2">
-        <button onclick="window.print()" title="Download PDF/Print" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-brand-600 transition">📄</button>
-        <button onclick="toggleSidebar()" title="Calculation History" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-brand-600 transition">📜</button>
-        <button onclick="toggleDark()" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:scale-105 transition">
-            <span class="dark:hidden">🌙</span><span class="hidden dark:block">☀️</span>
-        </button>
+        <button onclick="window.print()" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-brand-600 transition">📄</button>
+        <button onclick="toggleSidebar()" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-brand-600 transition">📜</button>
+        <button onclick="toggleDark()" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 transition">🌙</button>
     </div>
 </header>
 
 <main class="max-w-7xl mx-auto p-6 grid gap-8 md:grid-cols-2 lg:grid-cols-3 items-start">
     
     <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
-        <h2 class="text-xl font-bold text-brand-600 mb-1">Color Code</h2>
-        <p class="text-[10px] text-slate-400 uppercase font-bold mb-4 italic">4-Band Resistor Guide</p>
-        
-        <div class="resistor-body no-print">
-            <div class="resistor-lead"></div>
-            <div id="band1" class="band rounded-sm"></div>
-            <div id="band2" class="band rounded-sm"></div>
-            <div id="band3" class="band rounded-sm"></div>
-            <div id="band4" class="band rounded-sm ml-4"></div>
+        <h2 class="text-xl font-bold text-brand-600">Color Code</h2>
+        <code class="text-[10px] font-bold opacity-70 italic">4-Band Resistor Standard</code>
+        <div class="resistor-body no-print"><div class="resistor-lead"></div><div id="band1" class="band"></div><div id="band2" class="band"></div><div id="band3" class="band"></div><div id="band4" class="band ml-4"></div></div>
+        <div id="color-selectors" class="space-y-2 mb-6">
+            <div id="b1-select"></div><div id="b2-select"></div><div id="b3-select"></div><div id="b4-select"></div>
         </div>
-
-        <div id="color-selectors" class="space-y-4 mb-6">
-            <div id="b1-select"></div>
-            <div id="b2-select"></div>
-            <div id="b3-select"></div>
-            <div id="b4-select"></div>
-        </div>
-
-        <div class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800">
-            <span class="text-[10px] font-bold text-brand-600 uppercase block mb-1">Resistance</span>
-            <div id="resistor-res" class="text-lg font-mono font-bold glow-result">Select Colors</div>
+        <div class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 mb-4">
+            <div id="resistor-res" class="text-lg font-mono font-bold glow-result">—</div>
         </div>
     </div>
 
     <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
         <h2 class="text-xl font-bold text-brand-600">Ohm's Law</h2>
-        <select id="ohm_m" onchange="renderOhm()" class="w-full mt-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-bold no-print">
+        <code class="text-[10px] font-bold opacity-70 italic mb-4">Formula: V = R × I | P = V × I</code>
+        <select id="ohm_m" onchange="renderOhm()" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-bold mb-6">
             <option value="UI">Solve for R & P (Given V, I)</option>
             <option value="UR">Solve for I & P (Given V, R)</option>
             <option value="IR">Solve for V & P (Given I, R)</option>
         </select>
-        <div id="ohm-inputs" class="space-y-4 my-6"></div>
+        <div id="ohm-inputs" class="space-y-4 mb-6"></div>
         <div id="ohm-res" class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-lg font-mono font-bold glow-result">—</div>
-        <div class="kb-text mt-4 opacity-50 no-print">
-            <p>Relationship between <strong>Voltage</strong>, <strong>Current</strong>, and <strong>Resistance</strong>.</p>
+        <div class="kb-text mt-4">
+            <h3>What is Ohm's Law?</h3>
+            <p>Fundamental relationship in electrical circuits between <strong>Voltage (V)</strong>, <strong>Current (I)</strong>, and <strong>Resistance (R)</strong>.</p>
         </div>
     </div>
 
     <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
-        <h2 class="text-xl font-bold text-brand-600 mb-4">Voltage Drop</h2>
+        <h2 class="text-xl font-bold text-brand-600">Voltage Drop</h2>
+        <code class="text-[10px] font-bold opacity-70 italic mb-4">Formula: ΔV = (2·L·I) / (κ·A)</code>
         <div id="vd-inputs" class="space-y-4 mb-6"></div>
         <div id="vd-res" class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-lg font-mono font-bold glow-result">—</div>
-        <div class="kb-text mt-4 opacity-50 no-print">
-            <p>Calculate loss over cable length (L) based on cross-section (A).</p>
+        <div class="kb-text mt-4">
+            <h3>Understanding Drop</h3>
+            <p>Calculates the reduction in potential difference over long cables based on <strong>Length (L)</strong> and <strong>Material (κ)</strong>.</p>
         </div>
     </div>
 
 </main>
 
-<footer class="max-w-6xl mx-auto p-12 text-center text-slate-400 text-[10px] font-mono no-print">
-    <p>κ Copper: 56 MS/m | g: 9.81 m/s² | Designed for Professional Engineering</p>
-</footer>
-
 <script>
-// --- CORE UI ---
-function toggleDark() {
-    document.documentElement.classList.toggle('dark');
-    localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-}
-if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
-
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('translate-x-full'); renderHistory(); }
-
-// --- HISTORY LOGIC ---
-function saveToHistory(calc) {
-    let history = JSON.parse(localStorage.getItem('engiHistory') || '[]');
-    history.unshift({ time: new Date().toLocaleTimeString(), text: calc });
-    if(history.length > 10) history.pop();
-    localStorage.setItem('engiHistory', JSON.stringify(history));
-}
-
-function renderHistory() {
-    const list = document.getElementById('history-list');
-    const history = JSON.parse(localStorage.getItem('engiHistory') || '[]');
-    list.innerHTML = history.map(h => `<div class="p-2 border-b dark:border-slate-800"><span class="text-brand-600 block">[${h.time}]</span>${h.text}</div>`).join('');
-}
-function clearHistory() { localStorage.removeItem('engiHistory'); renderHistory(); }
-
-// --- COLOR CODE CALCULATOR ---
 const colors = [
     { name: 'Black', val: 0, mult: 1, tol: null, hex: '#000000' },
     { name: 'Brown', val: 1, mult: 10, tol: 1, hex: '#8B4513' },
@@ -151,55 +107,53 @@ const colors = [
     { name: 'Silver', val: null, mult: 0.01, tol: 10, hex: '#C0C0C0' }
 ];
 
-let selection = [0, 0, 1, 10]; // Indices
+let selection = [1, 0, 2, 10]; // Default: Brown, Black, Red, Gold (1k Ohm)
 
 function setupColorPicker() {
     const labels = ['Digit 1', 'Digit 2', 'Multiplier', 'Tolerance'];
+    const ids = ['b1-select', 'b2-select', 'b3-select', 'b4-select'];
     labels.forEach((label, i) => {
-        let html = `<label class="text-[9px] font-bold uppercase text-slate-400 mb-1 block">${label}</label><div class="flex flex-wrap gap-2">`;
+        let html = `<label class="text-[9px] font-bold text-slate-400 uppercase mb-1 block">${label}</label><div class="flex flex-wrap gap-1.5">`;
         colors.forEach((c, idx) => {
-            if(i < 2 && c.val === null) return;
-            if(i === 2 && c.mult === null) return;
-            if(i === 3 && c.tol === null) return;
-            html += `<div onclick="selectColor(${i}, ${idx})" class="color-dot" style="background:${c.hex}" title="${c.name}"></div>`;
+            if((i < 2 && c.val === null) || (i === 2 && c.mult === null) || (i === 3 && c.tol === null)) return;
+            const sel = selection[i] === idx ? 'ring-2 ring-brand-600 ring-offset-1' : '';
+            html += `<button onclick="selectColor(${i}, ${idx})" class="color-dot ${sel}" style="background:${c.hex}"></button>`;
         });
-        document.getElementById(`b${i+1}-select`).innerHTML = html + `</div>`;
+        document.getElementById(ids[i]).innerHTML = html + `</div>`;
     });
 }
 
-function selectColor(band, idx) {
-    selection[band] = idx;
-    updateResistor();
-}
+function selectColor(b, idx) { selection[b] = idx; setupColorPicker(); updateResistor(); }
 
 function updateResistor() {
-    const b1 = colors[selection[0]], b2 = colors[selection[1]], b3 = colors[selection[2]], b4 = colors[selection[3]];
-    
-    document.getElementById('band1').style.background = b1.hex;
-    document.getElementById('band2').style.background = b2.hex;
-    document.getElementById('band3').style.background = b3.hex;
-    document.getElementById('band4').style.background = b4.hex;
-
-    const val = (b1.val * 10 + b2.val) * b3.mult;
-    let displayVal = val >= 1e6 ? (val/1e6).toFixed(2)+' MΩ' : (val >= 1e3 ? (val/1e3).toFixed(2)+' kΩ' : val.toFixed(1)+' Ω');
-    const resultText = `${displayVal} ±${b4.tol}%`;
-    document.getElementById('resistor-res').innerText = resultText;
+    const b = selection.map(i => colors[i]);
+    [1,2,3,4].forEach(i => document.getElementById('band'+i).style.background = b[i-1].hex);
+    const val = (b[0].val * 10 + b[1].val) * b[2].mult;
+    let disp = val >= 1e6 ? (val/1e6).toFixed(1)+' MΩ' : (val >= 1e3 ? (val/1e3).toFixed(1)+' kΩ' : val + ' Ω');
+    document.getElementById('resistor-res').innerText = `${disp} ±${b[3].tol}%`;
 }
 
-// --- CALCULATION LOGIC ---
+function toggleDark() { document.documentElement.classList.toggle('dark'); }
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); renderHistory(); }
+
 function convert(v, u) { 
     const f = { 'p':1e-12, 'n':1e-9, 'µ':1e-6, 'm':1e-3, 'k':1e3, 'M':1e6, 'G':1e9, 'T':1e12 };
     return f[u] ? v * f[u] : v; 
 }
+
 function field(id, label, icon, fn) {
-    return `<div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1 tracking-tight">${label}</label>
+    return `<div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">${label}</label>
     <div class="flex space-x-2"><div class="relative flex-grow">
-    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 opacity-60">${icon}</span>
-    <input id="${id}" type="number" step="any" placeholder="0.00" oninput="${fn}" class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono">
+    <span class="absolute left-3 top-1/2 -translate-y-1/2 opacity-50">${icon}</span>
+    <input id="${id}" type="number" step="any" oninput="${fn}" class="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono">
     </div><select id="${id}_u" onchange="${fn}" class="w-16 p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-[10px] font-bold outline-none border-none">
-    <option value="">—</option><option value="m">m</option><option value="k">k</option><option value="M">M</option></select></div></div>`;
+    <option value="">—</option><option value="p">p</option><option value="n">n</option><option value="µ">µ</option><option value="m">m</option><option value="k">k</option><option value="M">M</option></select></div></div>`;
 }
-function getVal(id) { return convert(parseFloat(document.getElementById(id).value), document.getElementById(id+"_u").value); }
+
+function getVal(id) { 
+    const el = document.getElementById(id);
+    return el ? convert(parseFloat(el.value), document.getElementById(id+"_u").value) : 0; 
+}
 
 function renderOhm() {
     let m = document.getElementById("ohm_m").value, h = "";
@@ -210,7 +164,7 @@ function renderOhm() {
 }
 
 function calcOhm() {
-    let m = document.getElementById("ohm_m").value; let res = "";
+    let m = document.getElementById("ohm_m").value, res = "";
     if(m==="UI") { let u=getVal("o_u"), i=getVal("o_i"); if(u&&i) res=`R: ${(u/i).toFixed(2)}Ω | P: ${(u*i).toFixed(2)}W`; }
     else if(m==="UR") { let u=getVal("o_u"), r=getVal("o_r"); if(u&&r) res=`I: ${(u/r).toFixed(2)}A | P: ${(u**2/r).toFixed(2)}W`; }
     else if(m==="IR") { let i=getVal("o_i"), r=getVal("o_r"); if(i&&r) res=`V: ${(i*r).toFixed(2)}V | P: ${(i**2*r).toFixed(2)}W`; }
@@ -224,6 +178,16 @@ function renderVD() {
 function calcVD() {
     let i=getVal("vd_i"), l=getVal("vd_l"), a=getVal("vd_a");
     if(i && l && a) { let v = ((2*l*i)/(56*a)).toFixed(4); document.getElementById("vd-res").innerText = `ΔV: ${v} V`; saveToHistory("Drop: " + v + "V"); }
+}
+
+function saveToHistory(t) {
+    let h = JSON.parse(localStorage.getItem('engiHistory') || '[]');
+    h.unshift({ time: new Date().toLocaleTimeString(), text: t });
+    localStorage.setItem('engiHistory', JSON.stringify(h.slice(0,10)));
+}
+function renderHistory() {
+    const h = JSON.parse(localStorage.getItem('engiHistory') || '[]');
+    document.getElementById('history-list').innerHTML = h.map(i => `<div class="p-2 border-b dark:border-slate-800"><span class="text-brand-600">[${i.time}]</span><br>${i.text}</div>`).join('');
 }
 
 setupColorPicker(); updateResistor(); renderOhm(); renderVD();
