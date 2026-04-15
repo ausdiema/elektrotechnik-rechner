@@ -2,38 +2,25 @@
 <html lang="en" id="htmlRoot">
 <head>
     <meta charset="UTF-8">
-    <title>Engineering Suite Pro – Electrical Tools</title>
-    <meta name="description" content="Professional electrical engineering calculators. Ohm's Law, Voltage Drop, and Power tools with modern UI for engineers and students.">
+    <title>EngiCalc Pro – The Engineering Suite</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f7ff',
-                            100: '#e0effe',
-                            600: '#2563eb', 
-                            700: '#1d4ed8',
-                            800: '#1e40af',
-                            900: '#1e3a8a',
-                        }
-                    }
-                }
-            }
+            theme: { extend: { colors: { brand: { 50: '#f0f7ff', 600: '#2563eb', 900: '#1e3a8a' } } } }
         }
     </script>
     <style>
         body { font-family: 'Inter', sans-serif; }
+        .glow-result { text-shadow: 0 0 15px rgba(37, 99, 235, 0.4); }
+        .kb-text h3 { @apply font-bold text-slate-800 dark:text-slate-200 mt-4 mb-1 text-xs uppercase; }
+        .kb-text p { @apply text-[12px] text-slate-500 leading-relaxed mb-2; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
-
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-300">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen transition-colors">
 
 <header class="max-w-6xl mx-auto p-6 flex justify-between items-center">
     <div class="flex items-center space-x-2">
@@ -41,164 +28,180 @@
             <span class="text-white text-2xl">⚡</span>
         </div>
         <div>
-            <h1 class="text-2xl font-bold tracking-tight">Engi<span class="text-brand-600">Calc</span> Pro</h1>
-            <p class="text-xs text-slate-500 uppercase tracking-widest font-semibold">Global Engineering Suite</p>
+            <h1 class="text-2xl font-bold tracking-tight uppercase italic">EngiCalc <span class="text-brand-600">Pro</span></h1>
         </div>
     </div>
-    
-    <button onclick="toggleDark()" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:scale-110 transition">
-        <span class="dark:hidden">🌙</span><span class="hidden dark:block">☀️</span>
-    </button>
+    <div class="flex space-x-2">
+        <button onclick="sharePage()" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-brand-600 transition">🔗</button>
+        <button onclick="toggleDark()" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:scale-105 transition">
+            <span class="dark:hidden">🌙</span><span class="hidden dark:block">☀️</span>
+        </button>
+    </div>
 </header>
 
 <main class="max-w-6xl mx-auto p-6">
-    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 items-start">
 
-        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:border-brand-600 hover:-translate-y-1 transition-all duration-300">
-            <div>
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-bold">Ohm's Law</h2>
-                    <span class="text-[10px] font-bold px-2 py-1 bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400 rounded-full uppercase">Basic</span>
-                </div>
-
-                <label class="text-[10px] font-bold text-slate-400 uppercase mb-2 block">Calculation Mode</label>
-                <select id="mode" onchange="renderOhm()" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-none ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-brand-600 outline-none transition mb-6 text-sm">
-                    <option value="UI">Given: U & I (Find R, P)</option>
-                    <option value="UR">Given: U & R (Find I, P)</option>
-                    <option value="IR">Given: I & R (Find U, P)</option>
+        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
+            <div class="mb-4">
+                <h2 class="text-xl font-bold text-brand-600">Ohm's Law</h2>
+                <code class="text-[10px] font-bold opacity-70 italic">V = I × R | P = V × I</code>
+            </div>
+            
+            <div class="space-y-4 mb-6">
+                <select id="ohm_m" onchange="renderOhm()" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-bold">
+                    <option value="UI">Solve for R & P (Given V, I)</option>
+                    <option value="UR">Solve for I & P (Given V, R)</option>
+                    <option value="IR">Solve for V & P (Given I, R)</option>
                 </select>
-
                 <div id="ohm-inputs" class="space-y-4"></div>
-
-                <div class="mt-8 p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 relative">
-                    <span class="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase block mb-1">Result</span>
-                    <div id="ohm-result" class="text-lg font-mono font-bold text-slate-800 dark:text-white truncate pr-10">—</div>
-                    <button onclick="copyToClipboard('ohm-result')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-600 transition">📋</button>
+                <div class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800">
+                    <span class="text-[10px] font-bold text-brand-600 uppercase block mb-1 tracking-widest">Calculated Result</span>
+                    <div id="ohm-res" class="text-lg font-mono font-bold glow-result">—</div>
                 </div>
             </div>
 
-            <button onclick="toggleFormula('ohm-formula')" class="mt-4 text-[10px] font-bold text-slate-400 uppercase hover:text-brand-600 transition flex items-center">
-                <span>View Formula</span> <span class="ml-1">↓</span>
-            </button>
-            <div id="ohm-formula" class="hidden mt-2 p-2 bg-slate-50 dark:bg-slate-800 rounded-lg text-[10px] font-mono text-slate-500">
-                U = R × I | P = U × I
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:border-brand-600 hover:-translate-y-1 transition-all duration-300">
-            <div>
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-bold">Voltage Drop</h2>
-                    <span class="text-[10px] font-bold px-2 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-full uppercase">Cable Sizing</span>
-                </div>
-
-                <div class="space-y-4">
-                    <div id="vd-inputs">
-                        </div>
-                </div>
-
-                <div class="mt-8 p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 relative">
-                    <span class="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase block mb-1">Result (ΔU)</span>
-                    <div id="vd-result" class="text-lg font-mono font-bold text-slate-800 dark:text-white">—</div>
-                    <button onclick="copyToClipboard('vd-result')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-600 transition">📋</button>
-                </div>
-            </div>
-
-            <button onclick="toggleFormula('vd-formula')" class="mt-4 text-[10px] font-bold text-slate-400 uppercase hover:text-brand-600 transition flex items-center">
-                <span>View Formula</span> <span class="ml-1">↓</span>
-            </button>
-            <div id="vd-formula" class="hidden mt-2 p-2 bg-slate-50 dark:bg-slate-800 rounded-lg text-[10px] font-mono text-slate-500">
-                ΔU = (2 × L × I) / (κ × A)
+            <hr class="border-slate-100 dark:border-slate-800 my-4">
+            
+            <div class="kb-text">
+                <h3 class="text-brand-600">What is Ohm's Law?</h3>
+                <p>Ohm's Law is the foundation of electrical engineering, establishing the linear relationship between <strong>Voltage (V)</strong>, <strong>Current (I)</strong>, and <strong>Resistance (R)</strong>. Discovered by Georg Simon Ohm, it states that the current through a conductor between two points is directly proportional to the voltage across them.</p>
+                <h3>Common Applications</h3>
+                <p>Engineers use this daily for circuit design, determining the correct resistor for an LED, and calculating the power consumption of household appliances. It is essential for analyzing both DC and AC circuits in electrical prototyping.</p>
             </div>
         </div>
 
-        <div class="bg-slate-200/50 dark:bg-slate-800/50 rounded-3xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center p-12 text-center">
-            <p class="text-slate-400 text-sm font-medium">Coming Soon:<br>Three-Phase Power & AC Tools</p>
+        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
+            <div class="mb-4">
+                <h2 class="text-xl font-bold text-brand-600">Voltage Drop</h2>
+                <code class="text-[10px] font-bold opacity-70 italic">ΔV = (2·L·I) / (κ·A)</code>
+            </div>
+            
+            <div class="space-y-4 mb-6" id="vd-inputs"></div>
+            
+            <div class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800">
+                <span class="text-[10px] font-bold text-brand-600 uppercase block mb-1 tracking-widest">Calculated Drop (ΔV)</span>
+                <div id="vd-res" class="text-lg font-mono font-bold glow-result">—</div>
+            </div>
+
+            <hr class="border-slate-100 dark:border-slate-800 my-4">
+
+            <div class="kb-text">
+                <h3 class="text-brand-600">Understanding Voltage Drop</h3>
+                <p>Voltage drop refers to the reduction in <strong>potential difference</strong> as electric current moves through the passive elements (wires) of an electrical circuit. High resistance in long cables leads to energy loss as heat, reducing the voltage available to the load.</p>
+                <h3>Cable Sizing & Safety</h3>
+                <p>Calculating voltage drop is crucial for electrical installations to comply with safety standards (like DIN VDE). It ensures that motors and electronics receive sufficient power. Key factors include <strong>conductor length</strong>, <strong>cross-sectional area</strong>, and <strong>material conductivity (κ)</strong>.</p>
+            </div>
         </div>
 
+        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
+            <h2 class="text-xl font-bold text-brand-600 mb-6">Unit Converter</h2>
+            <div class="space-y-6">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1 tracking-widest">Power: HP to kW</label>
+                    <div class="space-y-2">
+                        <input id="hp" type="number" placeholder="Horsepower" oninput="unitConv('hp')" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono">
+                        <input id="kw" type="number" placeholder="Kilowatts" oninput="unitConv('kw')" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1 tracking-widest">Temperature: °C to °F</label>
+                    <div class="flex space-x-2">
+                        <input id="c" type="number" placeholder="°C" oninput="unitConv('c')" class="w-1/2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono text-center">
+                        <input id="f" type="number" placeholder="°F" oninput="unitConv('f')" class="w-1/2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono text-center">
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </main>
 
-<script>
-const toggleDark = () => document.documentElement.classList.toggle("dark");
-const toggleFormula = (id) => document.getElementById(id).classList.toggle("hidden");
+<footer class="max-w-6xl mx-auto p-12 text-center text-slate-400 text-[11px] font-mono border-t border-slate-100 dark:border-slate-800 mt-12">
+    <p class="uppercase font-bold mb-2">Technical Engineering Constants</p>
+    <p>κ Copper: 56 MS/m | κ Aluminum: 35 MS/m | Gravity: 9.81 m/s² | Speed of Light: 299,792,458 m/s</p>
+</footer>
 
-function copyToClipboard(id) {
-    const text = document.getElementById(id).innerText;
-    if (text === "—") return;
-    navigator.clipboard.writeText(text);
-    alert("Result copied to clipboard!");
+<script>
+// Logic remains robust with extended prefix support
+if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+}
+function toggleDark() {
+    document.documentElement.classList.toggle('dark');
+    localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
 }
 
-function field(id, label, icon, calcFn) {
-    return `
-    <div class="relative group">
-        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1 block">${label}</label>
+function sharePage() {
+    navigator.clipboard.writeText(window.location.href);
+    alert("Share link copied to clipboard!");
+}
+
+function convert(v, u) {
+    if (isNaN(v)) return 0;
+    const f = { 'p':1e-12, 'n':1e-9, 'µ':1e-6, 'm':1e-3, 'k':1e3, 'M':1e6, 'G':1e9, 'T':1e12 };
+    return f[u] ? v * f[u] : v;
+}
+
+function field(id, label, icon, fn) {
+    return `<div>
+        <label class="text-[10px] font-bold text-slate-400 uppercase block ml-1 mb-1 tracking-tight">${label}</label>
         <div class="flex space-x-2">
             <div class="relative flex-grow">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-600 transition-colors">${icon}</span>
-                <input id="${id}" type="number" step="any" placeholder="0.00" oninput="${calcFn}" 
-                    class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-brand-600 outline-none transition text-sm font-mono">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 opacity-60">${icon}</span>
+                <input id="${id}" type="number" step="any" placeholder="0.00" oninput="${fn}" class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono focus:ring-2 focus:ring-brand-600 transition">
             </div>
-            <select id="${id}_u" onchange="${calcFn}" class="w-16 p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-[10px] font-bold outline-none">
-                <option value="">Unit</option>
+            <select id="${id}_u" onchange="${fn}" class="w-16 p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-[10px] font-bold outline-none border-none">
+                <option value="">—</option>
+                <option value="p">p</option><option value="n">n</option><option value="µ">µ</option>
                 <option value="m">m</option><option value="k">k</option><option value="M">M</option>
+                <option value="G">G</option><option value="T">T</option>
             </select>
         </div>
     </div>`;
 }
 
-function getVal(id) {
-    const v = parseFloat(document.getElementById(id).value);
-    const u = document.getElementById(id+"_u").value;
-    if (isNaN(v)) return 0;
-    const factors = { 'm': 1e-3, 'k': 1e3, 'M': 1e6 };
-    return factors[u] ? v * factors[u] : v;
-}
+function getVal(id) { return convert(parseFloat(document.getElementById(id).value), document.getElementById(id+"_u").value); }
 
-// OHM CALCULATION
 function renderOhm() {
-    let m = document.getElementById("mode").value;
+    let m = document.getElementById("ohm_m").value;
     let h = "";
-    if(m==="UI") { h += field("o_u","Voltage (V)","🔌","calcOhm()"); h += field("o_i","Current (I)","🚀","calcOhm()"); }
-    else if(m==="UR") { h += field("o_u","Voltage (V)","🔌","calcOhm()"); h += field("o_r","Resistance (Ω)","🚧","calcOhm()"); }
-    else if(m==="IR") { h += field("o_i","Current (I)","🚀","calcOhm()"); h += field("o_r","Resistance (Ω)","🚧","calcOhm()"); }
+    if(m==="UI") { h+=field("o_u","Voltage (V)","🔌","calcOhm()"); h+=field("o_i","Current (I)","🚀","calcOhm()"); }
+    else if(m==="UR") { h+=field("o_u","Voltage (V)","🔌","calcOhm()"); h+=field("o_r","Resistance (Ω)","🚧","calcOhm()"); }
+    else if(m==="IR") { h+=field("o_i","Current (I)","🚀","calcOhm()"); h+=field("o_r","Resistance (Ω)","🚧","calcOhm()"); }
     document.getElementById("ohm-inputs").innerHTML = h;
 }
 
 function calcOhm() {
-    let m = document.getElementById("mode").value;
-    let res = "—";
-    if(m==="UI") { let u=getVal("o_u"), i=getVal("o_i"); if(u&&i) res=`R: ${(u/i).toFixed(2)}Ω | P: ${(u*i).toFixed(2)}W`; }
-    else if(m==="UR") { let u=getVal("o_u"), r=getVal("o_r"); if(u&&r) res=`I: ${(u/r).toFixed(2)}A | P: ${(u*(u/r)).toFixed(2)}W`; }
-    else if(m==="IR") { let i=getVal("o_i"), r=getVal("o_r"); if(i&&r) res=`U: ${(i*r).toFixed(2)}V | P: ${(i*i*r).toFixed(2)}W`; }
-    document.getElementById("ohm-result").innerText = res;
+    let m = document.getElementById("ohm_m").value; let res = "—";
+    if(m==="UI") { let u=getVal("o_u"), i=getVal("o_i"); if(u&&i) res=`R: ${(u/i).toFixed(3)} Ω | P: ${(u*i).toFixed(3)} W`; }
+    else if(m==="UR") { let u=getVal("o_u"), r=getVal("o_r"); if(u&&r) res=`I: ${(u/r).toFixed(3)} A | P: ${(u*(u/r)).toFixed(3)} W`; }
+    else if(m==="IR") { let i=getVal("o_i"), r=getVal("o_r"); if(i&&r) res=`V: ${(i*r).toFixed(3) } V | P: ${(i*i*r).toFixed(3)} W`; }
+    document.getElementById("ohm-res").innerText = res;
 }
 
-// VOLTAGE DROP CALCULATION
 function renderVD() {
     let h = field("vd_i","Current (A)","🚀","calcVD()");
     h += field("vd_l","Length (m)","📏","calcVD()");
     h += field("vd_a","Cross-section (mm²)","⬛","calcVD()");
-    h += `<div class="relative group">
-            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1 block">Conductivity (κ - Copper=56)</label>
-            <input id="vd_k" type="number" value="56" oninput="calcVD()" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-brand-600 outline-none transition text-sm font-mono">
-          </div>`;
+    h += `<div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1 ml-1">κ (Copper=56, Alum=35)</label>
+          <input id="vd_k" type="number" value="56" oninput="calcVD()" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono focus:ring-2 focus:ring-brand-600 transition"></div>`;
     document.getElementById("vd-inputs").innerHTML = h;
 }
 
 function calcVD() {
     let i=getVal("vd_i"), l=getVal("vd_l"), a=getVal("vd_a"), k=parseFloat(document.getElementById("vd_k").value);
-    if(i && l && a && k) {
-        let dv = (2 * l * i) / (k * a);
-        document.getElementById("vd-result").innerText = `ΔU: ${dv.toFixed(3)} V`;
-    } else {
-        document.getElementById("vd-result").innerText = "—";
-    }
+    if(i && l && a && k) document.getElementById("vd-res").innerText = `ΔV: ${((2*l*i)/(k*a)).toFixed(4)} V`;
+    else document.getElementById("vd-res").innerText = "—";
 }
 
-renderOhm();
-renderVD();
+function unitConv(type) {
+    if(type==='hp') document.getElementById('kw').value = (document.getElementById('hp').value * 0.7457).toFixed(3);
+    if(type==='kw') document.getElementById('hp').value = (document.getElementById('kw').value / 0.7457).toFixed(3);
+    if(type==='c') document.getElementById('f').value = (document.getElementById('c').value * 9/5 + 32).toFixed(1);
+    if(type==='f') document.getElementById('c').value = ((document.getElementById('f').value - 32) * 5/9).toFixed(1);
+}
+
+renderOhm(); renderVD();
 </script>
 </body>
 </html>
