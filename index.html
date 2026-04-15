@@ -18,20 +18,24 @@
         .kb-text h3 { @apply font-bold text-slate-800 dark:text-slate-200 mt-4 mb-1 text-xs uppercase; }
         .kb-text p { @apply text-[11px] text-slate-500 leading-relaxed mb-2; }
         
-        /* Sidebar Fix: display:none verhindert das Blockieren von Klicks */
-        #sidebar { display: none; position: fixed; right: 0; top: 0; height: 100%; width: 256px; z-index: 100; }
+        /* Sidebar Fix: Use display none to prevent any click interference */
+        #sidebar { display: none; position: fixed; right: 0; top: 0; height: 100%; width: 280px; z-index: 100; }
         #sidebar.open { display: block; }
         
         main { position: relative; z-index: 10; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         @media print { .no-print { display: none; } }
+
+        /* SVG Schematic Styling */
+        .schematic-svg { width: 100%; height: auto; max-width: 180px; margin: 0 auto; display: block; }
+        .schematic-text { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; fill: currentColor; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen">
 
 <div id="sidebar" class="bg-white dark:bg-slate-900 shadow-2xl p-6 border-l dark:border-slate-800 no-print">
     <div class="flex justify-between items-center mb-6">
-        <h3 class="font-bold uppercase text-xs tracking-widest text-brand-600">History</h3>
+        <h3 class="font-bold uppercase text-xs tracking-widest text-brand-600">Calculation History</h3>
         <button onclick="toggleSidebar()" class="text-slate-400 hover:text-red-500 text-xl">✕</button>
     </div>
     <div id="history-list" class="space-y-3 overflow-y-auto max-h-[80vh] text-[11px] font-mono"></div>
@@ -44,7 +48,7 @@
     </div>
     <div class="flex space-x-2">
         <button onclick="window.print()" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-brand-600 transition text-lg">📄</button>
-        <button onclick="toggleSidebar()" class="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-brand-600 transition text-xs font-bold uppercase">📜 History</button>
+        <button onclick="toggleSidebar()" class="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-brand-600 transition text-xs font-bold uppercase tracking-wider">📜 History</button>
         <button onclick="toggleDark()" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 transition text-xl">🌙</button>
     </div>
 </header>
@@ -52,12 +56,25 @@
 <main class="max-w-7xl mx-auto p-6 grid gap-8 md:grid-cols-2 lg:grid-cols-3 items-start">
     
     <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
-        <div class="mb-2">
+        <div class="mb-4">
             <h2 class="text-xl font-bold text-brand-600">Voltage Divider</h2>
-            <code class="text-[10px] font-bold opacity-70 italic">Formula: Vout = Vin × (R2 / (R1+R2))</code>
+            <code class="text-[10px] font-bold opacity-70 italic">Vout = Vin × (R2 / (R1 + R2))</code>
         </div>
 
-        <div class="space-y-4 mb-6 mt-4">
+        <div class="py-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl mb-6 border border-slate-100 dark:border-slate-700/50">
+            <svg class="schematic-svg text-slate-400 dark:text-slate-500" viewBox="0 0 120 160">
+                <path d="M60,10 L60,30 M60,60 L60,80 M60,110 L60,130 M60,80 L100,80" fill="none" stroke="currentColor" stroke-width="2"/>
+                <rect x="50" y="30" width="20" height="30" fill="none" stroke="currentColor" stroke-width="2"/>
+                <rect x="50" y="80" width="20" height="30" fill="none" stroke="currentColor" stroke-width="2"/>
+                <path d="M50,130 L70,130 M55,135 L65,135 M58,140 L62,140" stroke="currentColor" stroke-width="2"/>
+                <text x="15" y="20" class="schematic-text fill-brand-600">Vin</text>
+                <text x="80" y="45" class="schematic-text">R1</text>
+                <text x="80" y="95" class="schematic-text">R2</text>
+                <text x="85" y="75" class="schematic-text fill-brand-600">Vout</text>
+            </svg>
+        </div>
+
+        <div class="space-y-4 mb-6">
             <div id="f_vin"></div>
             <div id="f_r1"></div>
             <div id="f_r2"></div>
@@ -67,7 +84,7 @@
             <span class="text-[10px] font-bold text-brand-600 uppercase block mb-1 tracking-widest">Output Voltage (Vout)</span>
             <div id="div-res" class="text-lg font-mono font-bold glow-result">—</div>
         </div>
-        <div class="kb-text mt-4"><h3>Info</h3><p>Berechnet die Ausgangsspannung eines unbelasteten Spannungsteilers.</p></div>
+        <div class="kb-text mt-4"><h3>Info</h3><p>Calculates the output voltage of an unloaded voltage divider circuit.</p></div>
     </div>
 
     <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
@@ -80,7 +97,7 @@
         </select>
         <div id="ohm-inputs" class="space-y-4 mb-6"></div>
         <div id="ohm-res" class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-lg font-mono font-bold glow-result">—</div>
-        <div class="kb-text mt-4"><h3>Info</h3><p>Relationship between <strong>Voltage</strong>, <strong>Current</strong>, and <strong>Resistance</strong>.</p></div>
+        <div class="kb-text mt-4"><h3>Context</h3><p>Relationship between <strong>Voltage</strong>, <strong>Current</strong>, and <strong>Resistance</strong>.</p></div>
     </div>
 
     <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
@@ -88,13 +105,13 @@
         <code class="text-[10px] font-bold opacity-70 italic mb-4">Formula: ΔV = (2·L·I) / (κ·A)</code>
         <div id="vd-inputs" class="space-y-4 mb-6"></div>
         <div id="vd-res" class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-lg font-mono font-bold glow-result">—</div>
-        <div class="kb-text mt-4"><h3>Info</h3><p>Calculates energy loss over a specific cable length and material conductivity.</p></div>
+        <div class="kb-text mt-4"><h3>Loss Calculation</h3><p>Calculates voltage loss over specific cable length based on material conductivity (κ=56 for Copper).</p></div>
     </div>
 
 </main>
 
 <script>
-// --- CORE FUNCTIONS ---
+// --- CORE UTILITIES ---
 function toggleDark() { document.documentElement.classList.toggle('dark'); }
 function toggleSidebar() { 
     const s = document.getElementById('sidebar');
@@ -111,9 +128,9 @@ function field(id, label, icon, fn) {
     return `<div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">${label}</label>
     <div class="flex space-x-2"><div class="relative flex-grow">
     <span class="absolute left-3 top-1/2 -translate-y-1/2 opacity-50">${icon}</span>
-    <input id="${id}" type="number" step="any" oninput="${fn}" class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono">
-    </div><select id="${id}_u" onchange="${fn}" class="w-16 p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-[10px] font-bold outline-none border-none">
-    <option value="">—</option><option value="m">m</option><option value="k">k</option><option value="M">M</option></select></div></div>`;
+    <input id="${id}" type="number" step="any" oninput="${fn}" class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono focus:ring-1 focus:ring-brand-600 transition">
+    </div><select id="${id}_u" onchange="${fn}" class="w-16 p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-[10px] font-bold outline-none border-none cursor-pointer">
+    <option value="">unit</option><option value="m">milli</option><option value="k">kilo</option><option value="M">Mega</option></select></div></div>`;
 }
 
 function getVal(id) { 
@@ -122,17 +139,16 @@ function getVal(id) {
     return convert(parseFloat(el.value), document.getElementById(id+"_u").value); 
 }
 
-// --- VOLTAGE DIVIDER LOGIC ---
+// --- CALCULATION LOGIC ---
 function calcDiv() {
     let vin = getVal("v_in"), r1 = getVal("v_r1"), r2 = getVal("v_r2");
     if(vin && (r1 || r2)) {
         let vout = vin * (r2 / (r1 + r2));
         document.getElementById('div-res').innerText = vout.toFixed(3) + " V";
-        saveToHistory(`Divider: ${vout.toFixed(2)}V Out`);
+        saveToHistory(`Voltage Divider: ${vout.toFixed(2)}V (from ${vin}V)`);
     }
 }
 
-// --- OHM'S LAW LOGIC ---
 function renderOhm() {
     let m = document.getElementById("ohm_m").value, h = "";
     if(m==="UI") { h+=field("o_u","Voltage (V)","🔌","calcOhm()"); h+=field("o_i","Current (I)","🚀","calcOhm()"); }
@@ -146,20 +162,26 @@ function calcOhm() {
     if(m==="UI" && u && i) res=`R: ${(u/i).toFixed(2)}Ω | P: ${(u*i).toFixed(2)}W`;
     else if(m==="UR" && u && r) res=`I: ${(u/r).toFixed(2)}A | P: ${(u**2/r).toFixed(2)}W`;
     else if(m==="IR" && i && r) res=`V: ${(i*r).toFixed(2)}V | P: ${(i**2*r).toFixed(2)}W`;
-    if(res) { document.getElementById("ohm-res").innerText = res; saveToHistory("Ohm: " + res); }
+    if(res) { document.getElementById("ohm-res").innerText = res; saveToHistory("Ohm's Law: " + res); }
 }
 
-// --- VOLTAGE DROP LOGIC ---
 function renderVD() {
-    document.getElementById("vd-inputs").innerHTML = field("vd_i","Current (A)","🚀","calcVD()") + field("vd_l","Length (m)","📏","calcVD()") + field("vd_a","Cross-section (mm²)","⬛","calcVD()");
+    document.getElementById("vd-inputs").innerHTML = 
+        field("vd_i","Current (A)","🚀","calcVD()") + 
+        field("vd_l","Length (m)","📏","calcVD()") + 
+        field("vd_a","Cross-section (mm²)","⬛","calcVD()");
 }
 
 function calcVD() {
     let i=getVal("vd_i"), l=getVal("vd_l"), a=getVal("vd_a");
-    if(i && l && a) { let v = ((2*l*i)/(56*a)).toFixed(4); document.getElementById("vd-res").innerText = `ΔV: ${v} V`; saveToHistory("Drop: " + v + "V"); }
+    if(i && l && a) { 
+        let v = ((2*l*i)/(56*a)).toFixed(4); 
+        document.getElementById("vd-res").innerText = `ΔV: ${v} V`; 
+        saveToHistory(`Voltage Drop: ${v}V (L=${l}m, I=${i}A)`); 
+    }
 }
 
-// --- HISTORY ---
+// --- HISTORY SYSTEM ---
 function saveToHistory(t) {
     let h = JSON.parse(localStorage.getItem('engiHistory') || '[]');
     if(h.length > 0 && h[0].text === t) return; 
@@ -169,13 +191,17 @@ function saveToHistory(t) {
 
 function renderHistory() {
     const h = JSON.parse(localStorage.getItem('engiHistory') || '[]');
-    document.getElementById('history-list').innerHTML = h.map(i => `<div class="p-2 border-b dark:border-slate-800"><span class="text-brand-600 font-bold">[${i.time}]</span><br>${i.text}</div>`).join('') || '<p class="opacity-50 italic">No history yet.</p>';
+    document.getElementById('history-list').innerHTML = h.map(i => `
+        <div class="p-2 border-b dark:border-slate-800">
+            <span class="text-brand-600 font-bold text-[9px] uppercase">${i.time}</span><br>
+            <span class="text-slate-700 dark:text-slate-300">${i.text}</span>
+        </div>`).join('') || '<p class="opacity-50 italic text-center py-4">No calculations yet.</p>';
 }
 
-// --- INIT ---
-document.getElementById('f_vin').innerHTML = field("v_in", "Voltage In (Vin)", "🔋", "calcDiv()");
-document.getElementById('f_r1').innerHTML = field("v_r1", "Resistor R1", "🚧", "calcDiv()");
-document.getElementById('f_r2').innerHTML = field("v_r2", "Resistor R2", "🚧", "calcDiv()");
+// --- INITIALIZATION ---
+document.getElementById('f_vin').innerHTML = field("v_in", "Supply Voltage (Vin)", "🔋", "calcDiv()");
+document.getElementById('f_r1').innerHTML = field("v_r1", "Resistor R1 (Ω)", "🚧", "calcDiv()");
+document.getElementById('f_r2').innerHTML = field("v_r2", "Resistor R2 (Ω)", "🚧", "calcDiv()");
 renderOhm(); 
 renderVD();
 </script>
