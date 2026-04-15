@@ -18,7 +18,6 @@
         .kb-text h3 { @apply font-bold text-slate-800 dark:text-slate-200 mt-4 mb-1 text-xs uppercase; }
         .kb-text p { @apply text-[11px] text-slate-500 leading-relaxed mb-2; }
         
-        /* Sidebar Fix: Use display none to prevent any click interference */
         #sidebar { display: none; position: fixed; right: 0; top: 0; height: 100%; width: 280px; z-index: 100; }
         #sidebar.open { display: block; }
         
@@ -26,9 +25,8 @@
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         @media print { .no-print { display: none; } }
 
-        /* SVG Schematic Styling */
-        .schematic-svg { width: 100%; height: auto; max-width: 180px; margin: 0 auto; display: block; }
-        .schematic-text { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; fill: currentColor; }
+        .schematic-svg { width: 100%; height: auto; max-width: 220px; margin: 0 auto; display: block; }
+        .schematic-text { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 11px; fill: currentColor; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen">
@@ -56,41 +54,9 @@
 <main class="max-w-7xl mx-auto p-6 grid gap-8 md:grid-cols-2 lg:grid-cols-3 items-start">
     
     <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
-        <div class="mb-4">
-            <h2 class="text-xl font-bold text-brand-600">Voltage Divider</h2>
-            <code class="text-[10px] font-bold opacity-70 italic">Vout = Vin × (R2 / (R1 + R2))</code>
-        </div>
-
-        <div class="py-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl mb-6 border border-slate-100 dark:border-slate-700/50">
-            <svg class="schematic-svg text-slate-400 dark:text-slate-500" viewBox="0 0 120 160">
-                <path d="M60,10 L60,30 M60,60 L60,80 M60,110 L60,130 M60,80 L100,80" fill="none" stroke="currentColor" stroke-width="2"/>
-                <rect x="50" y="30" width="20" height="30" fill="none" stroke="currentColor" stroke-width="2"/>
-                <rect x="50" y="80" width="20" height="30" fill="none" stroke="currentColor" stroke-width="2"/>
-                <path d="M50,130 L70,130 M55,135 L65,135 M58,140 L62,140" stroke="currentColor" stroke-width="2"/>
-                <text x="15" y="20" class="schematic-text fill-brand-600">Vin</text>
-                <text x="80" y="45" class="schematic-text">R1</text>
-                <text x="80" y="95" class="schematic-text">R2</text>
-                <text x="85" y="75" class="schematic-text fill-brand-600">Vout</text>
-            </svg>
-        </div>
-
-        <div class="space-y-4 mb-6">
-            <div id="f_vin"></div>
-            <div id="f_r1"></div>
-            <div id="f_r2"></div>
-        </div>
-
-        <div class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800">
-            <span class="text-[10px] font-bold text-brand-600 uppercase block mb-1 tracking-widest">Output Voltage (Vout)</span>
-            <div id="div-res" class="text-lg font-mono font-bold glow-result">—</div>
-        </div>
-        <div class="kb-text mt-4"><h3>Info</h3><p>Calculates the output voltage of an unloaded voltage divider circuit.</p></div>
-    </div>
-
-    <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
         <h2 class="text-xl font-bold text-brand-600">Ohm's Law</h2>
         <code class="text-[10px] font-bold opacity-70 italic mb-4">Formula: V = R × I | P = V × I</code>
-        <select id="ohm_m" onchange="renderOhm()" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-bold mb-6">
+        <select id="ohm_m" onchange="renderOhm()" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-bold mb-6 cursor-pointer">
             <option value="UI">Solve for R & P (Given V, I)</option>
             <option value="UR">Solve for I & P (Given V, R)</option>
             <option value="IR">Solve for V & P (Given I, R)</option>
@@ -98,6 +64,54 @@
         <div id="ohm-inputs" class="space-y-4 mb-6"></div>
         <div id="ohm-res" class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-lg font-mono font-bold glow-result">—</div>
         <div class="kb-text mt-4"><h3>Context</h3><p>Relationship between <strong>Voltage</strong>, <strong>Current</strong>, and <strong>Resistance</strong>.</p></div>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
+        <div class="flex justify-between items-start mb-2">
+            <div>
+                <h2 class="text-xl font-bold text-brand-600">Voltage Divider</h2>
+                <code id="div-formula" class="text-[10px] font-bold opacity-70 italic">Vout = Vin × (R2 / (R1 + R2))</code>
+            </div>
+            <select id="div_mode" onchange="updateDivUI()" class="text-[10px] font-bold uppercase p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border-none outline-none cursor-pointer">
+                <option value="unloaded">Unloaded</option>
+                <option value="loaded">Loaded</option>
+            </select>
+        </div>
+
+        <div class="py-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl mb-6 border border-slate-100 dark:border-slate-700/50">
+            <svg id="div-svg" class="schematic-svg text-slate-400 dark:text-slate-500" viewBox="0 0 160 160">
+                <path d="M60,10 L60,30 M60,60 L60,80 M60,110 L60,130" fill="none" stroke="currentColor" stroke-width="2"/>
+                <rect x="50" y="30" width="20" height="30" fill="none" stroke="currentColor" stroke-width="2"/>
+                <rect x="50" y="80" width="20" height="30" fill="none" stroke="currentColor" stroke-width="2"/>
+                <path d="M50,130 L70,130 M55,135 L65,135 M58,140 L62,140" stroke="currentColor" stroke-width="2"/>
+                
+                <path d="M60,80 L140,80" fill="none" stroke="currentColor" stroke-width="2"/>
+                
+                <g id="load-path" class="hidden">
+                    <path d="M130,80 L130,90 M130,120 L130,130 L60,130" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <rect x="120" y="90" width="20" height="30" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <text x="145" y="110" class="schematic-text fill-brand-600">RL</text>
+                </g>
+
+                <text x="15" y="20" class="schematic-text fill-brand-600">Vin</text>
+                <text x="75" y="50" class="schematic-text">R1</text>
+                <text x="75" y="100" class="schematic-text">R2</text>
+                <text x="100" y="75" class="schematic-text fill-brand-600">Vout</text>
+            </svg>
+        </div>
+
+        <div class="space-y-4 mb-6">
+            <div id="f_vin"></div>
+            <div id="f_r1"></div>
+            <div id="f_r2"></div>
+            <div id="f_rl" class="hidden"></div>
+        </div>
+
+        <div class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800">
+            <span class="text-[10px] font-bold text-brand-600 uppercase block mb-1 tracking-widest">Output Voltage (Vout)</span>
+            <div id="div-res" class="text-lg font-mono font-bold glow-result">—</div>
+        </div>
+        <div class="kb-text mt-4"><h3>Info</h3><p id="div-info">Calculates the output voltage of an unloaded voltage divider.</p></div>
     </div>
 
     <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
@@ -120,7 +134,7 @@ function toggleSidebar() {
 }
 
 function convert(v, u) { 
-    const f = { 'p':1e-12, 'n':1e-9, 'µ':1e-6, 'm':1e-3, 'k':1e3, 'M':1e6, 'G':1e9, 'T':1e12 };
+    const f = { 'm':1e-3, 'k':1e3, 'M':1e6 };
     return f[u] ? v * f[u] : v; 
 }
 
@@ -130,7 +144,7 @@ function field(id, label, icon, fn) {
     <span class="absolute left-3 top-1/2 -translate-y-1/2 opacity-50">${icon}</span>
     <input id="${id}" type="number" step="any" oninput="${fn}" class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono focus:ring-1 focus:ring-brand-600 transition">
     </div><select id="${id}_u" onchange="${fn}" class="w-16 p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-[10px] font-bold outline-none border-none cursor-pointer">
-    <option value="">unit</option><option value="m">milli</option><option value="k">kilo</option><option value="M">Mega</option></select></div></div>`;
+    <option value="">unit</option><option value="m">m</option><option value="k">k</option><option value="M">M</option></select></div></div>`;
 }
 
 function getVal(id) { 
@@ -139,16 +153,34 @@ function getVal(id) {
     return convert(parseFloat(el.value), document.getElementById(id+"_u").value); 
 }
 
-// --- CALCULATION LOGIC ---
+// --- VOLTAGE DIVIDER LOGIC ---
+function updateDivUI() {
+    const isLoaded = document.getElementById('div_mode').value === 'loaded';
+    document.getElementById('f_rl').classList.toggle('hidden', !isLoaded);
+    document.getElementById('load-path').classList.toggle('hidden', !isLoaded);
+    document.getElementById('div-formula').innerText = isLoaded ? 'Vout = Vin × (R_p / (R1 + R_p))' : 'Vout = Vin × (R2 / (R1 + R2))';
+    document.getElementById('div-info').innerText = isLoaded ? 'Calculates the output voltage considering a parallel load resistor (RL).' : 'Calculates the output voltage of an unloaded voltage divider.';
+    calcDiv();
+}
+
 function calcDiv() {
-    let vin = getVal("v_in"), r1 = getVal("v_r1"), r2 = getVal("v_r2");
-    if(vin && (r1 || r2)) {
-        let vout = vin * (r2 / (r1 + r2));
+    let vin = getVal("v_in"), r1 = getVal("v_r1"), r2 = getVal("v_r2"), rl = getVal("v_rl");
+    let isLoaded = document.getElementById('div_mode').value === 'loaded';
+    
+    if(vin && r1 && r2) {
+        let vout;
+        if(isLoaded && rl) {
+            let rp = (r2 * rl) / (r2 + rl);
+            vout = vin * (rp / (r1 + rp));
+        } else {
+            vout = vin * (r2 / (r1 + r2));
+        }
         document.getElementById('div-res').innerText = vout.toFixed(3) + " V";
-        saveToHistory(`Voltage Divider: ${vout.toFixed(2)}V (from ${vin}V)`);
+        saveToHistory(`Divider (${isLoaded?'Loaded':'Unloaded'}): ${vout.toFixed(2)}V`);
     }
 }
 
+// --- OHM'S LAW LOGIC ---
 function renderOhm() {
     let m = document.getElementById("ohm_m").value, h = "";
     if(m==="UI") { h+=field("o_u","Voltage (V)","🔌","calcOhm()"); h+=field("o_i","Current (I)","🚀","calcOhm()"); }
@@ -165,6 +197,7 @@ function calcOhm() {
     if(res) { document.getElementById("ohm-res").innerText = res; saveToHistory("Ohm's Law: " + res); }
 }
 
+// --- VOLTAGE DROP LOGIC ---
 function renderVD() {
     document.getElementById("vd-inputs").innerHTML = 
         field("vd_i","Current (A)","🚀","calcVD()") + 
@@ -177,7 +210,7 @@ function calcVD() {
     if(i && l && a) { 
         let v = ((2*l*i)/(56*a)).toFixed(4); 
         document.getElementById("vd-res").innerText = `ΔV: ${v} V`; 
-        saveToHistory(`Voltage Drop: ${v}V (L=${l}m, I=${i}A)`); 
+        saveToHistory(`Voltage Drop: ${v}V`); 
     }
 }
 
@@ -195,13 +228,14 @@ function renderHistory() {
         <div class="p-2 border-b dark:border-slate-800">
             <span class="text-brand-600 font-bold text-[9px] uppercase">${i.time}</span><br>
             <span class="text-slate-700 dark:text-slate-300">${i.text}</span>
-        </div>`).join('') || '<p class="opacity-50 italic text-center py-4">No calculations yet.</p>';
+        </div>`).join('') || '<p class="opacity-50 italic text-center py-4">No records.</p>';
 }
 
 // --- INITIALIZATION ---
 document.getElementById('f_vin').innerHTML = field("v_in", "Supply Voltage (Vin)", "🔋", "calcDiv()");
 document.getElementById('f_r1').innerHTML = field("v_r1", "Resistor R1 (Ω)", "🚧", "calcDiv()");
 document.getElementById('f_r2').innerHTML = field("v_r2", "Resistor R2 (Ω)", "🚧", "calcDiv()");
+document.getElementById('f_rl').innerHTML = field("v_rl", "Load Resistor RL (Ω)", "🎯", "calcDiv()");
 renderOhm(); 
 renderVD();
 </script>
