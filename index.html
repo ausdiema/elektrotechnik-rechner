@@ -1,25 +1,25 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
-<title>Elektrotechnik Rechner</title>
 
-<!-- Inter Font -->
+<title>Elektrotechnik Rechner – Ohm, Leistung & Energie Tools</title>
+<meta name="description" content="Moderne Elektrotechnik Rechner für Ohmsches Gesetz, Leistung und Energie. Mit Einheitenumrechnung, Live-Berechnung und Historie. Ideal für Studenten und Ingenieure.">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Font -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
 <!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
 
 <script>
-tailwind.config = {
-  darkMode: 'class'
-}
+tailwind.config = { darkMode: 'class' }
 </script>
 
 <style>
-body {
-  font-family: 'Inter', sans-serif;
-}
+body { font-family: 'Inter', sans-serif; }
 </style>
 </head>
 
@@ -27,8 +27,9 @@ body {
 
 <!-- HEADER -->
 <header class="p-6 text-center relative">
-  <h1 class="text-3xl font-semibold">⚡ Elektrotechnik Rechner</h1>
-  
+  <h1 class="text-3xl font-semibold">⚡ Elektrotechnik Rechner Pro</h1>
+  <p class="text-gray-500">Live Berechnung • Einheiten • Historie • SEO Optimiert</p>
+
   <button onclick="toggleDark()" 
     class="absolute right-6 top-6 px-3 py-1 rounded-lg bg-gray-200 dark:bg-gray-700">
     🌙
@@ -38,53 +39,64 @@ body {
 <!-- GRID -->
 <div class="grid gap-6 p-6 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
 
-  <!-- CARD -->
-  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5">
-    
-    <h2 class="text-xl font-semibold mb-3">Ohm Gesetz</h2>
+<!-- OHM -->
+<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5">
 
-    <label class="text-sm text-gray-500">Was ist gegeben?</label>
-    <select id="mode" onchange="render()" 
-      class="w-full mt-1 p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
-      <option value="UI">Gegeben: U & I</option>
-      <option value="UR">Gegeben: U & R</option>
-      <option value="IR">Gegeben: I & R</option>
-    </select>
+<h2 class="text-xl font-semibold">Ohmsches Gesetz</h2>
 
-    <div id="inputs" class="mt-3 space-y-3"></div>
+<select id="mode" onchange="render()" 
+class="w-full mt-2 p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
 
-    <div id="result" 
-      class="mt-4 font-semibold text-blue-500"></div>
+<option value="UI">Gegeben: U & I</option>
+<option value="UR">Gegeben: U & R</option>
+<option value="IR">Gegeben: I & R</option>
 
-  </div>
+</select>
+
+<div id="inputs" class="space-y-3 mt-3"></div>
+
+<div id="result" class="mt-4 text-blue-500 font-semibold"></div>
+
+<div id="history" class="mt-3 text-xs text-gray-500"></div>
+
+<!-- SEO TEXT -->
+<p class="mt-4 text-sm text-gray-500">
+Das Ohmsche Gesetz beschreibt den Zusammenhang zwischen Spannung, Strom und Widerstand (U = R × I). 
+Es ist eine der wichtigsten Grundlagen der Elektrotechnik und wird in nahezu allen elektrischen Schaltungen angewendet.
+Durch Variation der Formel lassen sich Strom, Spannung oder Widerstand berechnen.
+</p>
+
+</div>
 
 </div>
 
 <script>
 
-// Dark Mode
+let history = [];
+
 function toggleDark(){
   document.body.classList.toggle("dark");
 }
 
-// Präfix
-function convert(v,p){
-  if(p==="µ") return v*1e-6;
-  if(p==="m") return v*1e-3;
-  if(p==="k") return v*1e3;
-  if(p==="M") return v*1e6;
+// ---------- EINHEITEN ----------
+function convert(v,u){
+  if(isNaN(v)) return NaN;
+  if(u==="µ") return v*1e-6;
+  if(u==="m") return v*1e-3;
+  if(u==="k") return v*1e3;
+  if(u==="M") return v*1e6;
   return v;
 }
 
-// Input Feld
+// ---------- INPUT ----------
 function field(id,label){
   return `
   <div>
     <input id="${id}" placeholder="${label}"
-      oninput="calc()"
+      oninput="calc()" 
       class="w-full p-2 rounded-lg bg-gray-100 dark:bg-gray-700 shadow-inner">
-    
-    <select id="${id}_p" onchange="calc()"
+
+    <select id="${id}_u" onchange="calc()"
       class="w-full mt-1 p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
       <option value="">Basis</option>
       <option value="µ">µ</option>
@@ -95,15 +107,15 @@ function field(id,label){
   </div>`;
 }
 
-// Wert holen
+// ---------- GET ----------
 function get(id){
   return convert(
     parseFloat(document.getElementById(id).value),
-    document.getElementById(id+"_p").value
+    document.getElementById(id+"_u").value
   );
 }
 
-// Render Inputs
+// ---------- RENDER ----------
 function render(){
   let m=document.getElementById("mode").value;
   let h="";
@@ -124,9 +136,24 @@ function render(){
   }
 
   document.getElementById("inputs").innerHTML=h;
+  calc();
 }
 
-// Berechnung
+// ---------- HISTORY ----------
+function saveHistory(text){
+  history.unshift(text);
+  history = history.slice(0,5);
+  localStorage.setItem("hist", JSON.stringify(history));
+  showHistory();
+}
+
+function showHistory(){
+  let h = JSON.parse(localStorage.getItem("hist") || "[]");
+  document.getElementById("history").innerText =
+    "Letzte Berechnungen:\n" + h.join("\n");
+}
+
+// ---------- CALC ----------
 function calc(){
   let m=document.getElementById("mode").value;
   let out="";
@@ -134,8 +161,7 @@ function calc(){
   if(m==="UI"){
     let u=get("u"), i=get("i");
     if(u && i){
-      out=`R = ${(u/i).toFixed(3)} Ω<br>
-           P = ${(u*i).toFixed(3)} W`;
+      out=`R = ${(u/i).toFixed(3)} Ω | P = ${(u*i).toFixed(3)} W`;
     }
   }
 
@@ -143,8 +169,7 @@ function calc(){
     let u=get("u"), r=get("r");
     if(u && r){
       let i=u/r;
-      out=`I = ${i.toFixed(3)} A<br>
-           P = ${(u*i).toFixed(3)} W`;
+      out=`I = ${i.toFixed(3)} A | P = ${(u*i).toFixed(3)} W`;
     }
   }
 
@@ -152,15 +177,19 @@ function calc(){
     let i=get("i"), r=get("r");
     if(i && r){
       let u=i*r;
-      out=`U = ${u.toFixed(3)} V<br>
-           P = ${(u*i).toFixed(3)} W`;
+      out=`U = ${u.toFixed(3)} V | P = ${(u*i).toFixed(3)} W`;
     }
   }
 
-  document.getElementById("result").innerHTML=out;
+  if(out){
+    document.getElementById("result").innerText = out;
+    saveHistory(out);
+  }
 }
 
+// INIT
 render();
+showHistory();
 
 </script>
 
