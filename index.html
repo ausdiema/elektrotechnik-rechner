@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -38,10 +39,11 @@
         .seo-content h3 { @apply text-lg font-bold mt-6 mb-2 text-brand-600 dark:text-brand-500; }
         .seo-content p { @apply text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-4; }
         
-        /* Validation & Copy Styles */
         .input-error { border: 2px solid #ef4444 !important; }
         .copy-btn:active { transform: scale(0.9); color: #3b82f6; }
-        .history-card { @apply p-3 rounded-xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 mb-2; }
+        /* Improved Contrast for History Cards */
+        .history-card { @apply p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 mb-3 shadow-sm; }
+        .history-card span { @apply text-slate-600 dark:text-slate-300; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen font-sans transition-colors duration-300">
@@ -84,7 +86,7 @@
     <div onclick="openCalc('calc-rc')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm hover:shadow-xl transition-all">
         <div class="text-brand-600 mb-4 font-bold font-mono">τ = R · C</div>
         <h2 class="text-xl font-bold">RC Time Constant</h2>
-        <p class="text-sm text-slate-500 mt-2">Charge and discharge timing.</p>
+        <p class="text-sm text-slate-500 mt-2">Charge and discharge timing with curve.</p>
     </div>
     <div onclick="openCalc('calc-wave')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm hover:shadow-xl transition-all">
         <div class="text-brand-600 mb-4 font-bold font-mono">λ = c / f</div>
@@ -108,7 +110,7 @@
 <div id="calc-container" class="max-w-4xl mx-auto p-6 hidden-view">
     <div class="flex justify-between items-center mb-8">
         <button onclick="showDashboard()" class="text-[10px] font-bold text-slate-400 hover:text-brand-600 tracking-widest uppercase">← Back to Dashboard</button>
-        <button onclick="exportToPDF()" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest">Download PDF</button>
+        <button onclick="exportToPDF()" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-lg transition-transform active:scale-95">Download PDF Protocol</button>
     </div>
 
     <section id="calc-ohm" class="calc-view hidden-view">
@@ -154,6 +156,22 @@
         </div>
     </section>
 
+    <section id="calc-rc" class="calc-view hidden-view">
+        <div class="formula-box mb-8" id="formula-rc"></div>
+        <div class="mb-6 flex gap-2" id="rc-modes"></div>
+        <div id="rc-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        <div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl border dark:border-slate-800 relative group">
+            <div id="rc-res" class="text-5xl font-mono font-bold text-brand-600 text-center">—</div>
+            <div class="mt-8 h-64 w-full">
+                <canvas id="rcChart"></canvas>
+            </div>
+            <button onclick="copyToClipboard('rc-res')" class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity copy-btn">📋</button>
+        </div>
+    </section>
+
+    <section id="calc-wave" class="calc-view hidden-view"><div class="formula-box mb-8" id="formula-wave"></div><div class="mb-6 flex gap-2" id="wave-modes"></div><div id="wave-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div><div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800 relative group"><div id="wave-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div><button onclick="copyToClipboard('wave-res')" class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity copy-btn">📋</button></div></section>
+    <section id="calc-power" class="calc-view hidden-view"><div class="formula-box mb-8" id="formula-power"></div><div class="mb-6 flex gap-2" id="power-modes"></div><div id="power-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div><div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800 relative group"><div id="power-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div><button onclick="copyToClipboard('power-res')" class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity copy-btn">📋</button></div></section>
+    
     <section id="calc-color" class="calc-view hidden-view">
         <div class="flex justify-center mb-10 py-12 bg-slate-200 dark:bg-slate-800 rounded-3xl">
             <svg width="300" height="100" viewBox="0 0 300 100">
@@ -172,10 +190,6 @@
         </div>
     </section>
 
-    <section id="calc-rc" class="calc-view hidden-view"><div class="formula-box mb-8" id="formula-rc"></div><div class="mb-6 flex gap-2" id="rc-modes"></div><div id="rc-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div><div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800 relative group"><div id="rc-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div><button onclick="copyToClipboard('rc-res')" class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity copy-btn">📋</button></div></section>
-    <section id="calc-wave" class="calc-view hidden-view"><div class="formula-box mb-8" id="formula-wave"></div><div class="mb-6 flex gap-2" id="wave-modes"></div><div id="wave-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div><div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800 relative group"><div id="wave-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div><button onclick="copyToClipboard('wave-res')" class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity copy-btn">📋</button></div></section>
-    <section id="calc-power" class="calc-view hidden-view"><div class="formula-box mb-8" id="formula-power"></div><div class="mb-6 flex gap-2" id="power-modes"></div><div id="power-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div><div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800 relative group"><div id="power-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div><button onclick="copyToClipboard('power-res')" class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity copy-btn">📋</button></div></section>
-
     <div id="seo-content" class="seo-content mt-16 pt-12 border-t border-slate-200 dark:border-slate-800">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div><h3 id="theory-title">Theoretical Background</h3><p id="theory-desc">Select a calculator to learn about the physics and mathematics behind the results.</p></div>
@@ -192,20 +206,20 @@ const SI_MAP = [
 ];
 
 let history = JSON.parse(localStorage.getItem('engicalc_history')) || [];
+let rcChart = null;
 
 function updateFormula(id, tex) {
     const el = document.getElementById(id);
     if (el) katex.render(tex, el, { throwOnError: false, displayMode: true });
 }
 
-// DRY Field generator with Validation & Enter support
 function field(id, label, fn, isTarget = false) {
     if(isTarget) return `<div class="p-6 rounded-2xl border-2 border-dashed border-brand-500/30 bg-brand-500/5 flex flex-col items-center justify-center space-y-2"><span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest searching-pulse">Calculating...</span><span class="text-xl font-bold">${label}</span></div>`;
     return `
     <div class="space-y-2">
         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">${label}</label>
         <div class="flex shadow-sm rounded-xl overflow-hidden ring-1 ring-slate-200 dark:ring-slate-800 focus-within:ring-2 focus-within:ring-brand-600 transition-all">
-            <input id="${id}" type="number" step="any" oninput="validate(this); ${fn}" onkeydown="handleEnter(event, ${fn})" placeholder="0.00" class="flex-grow p-4 bg-white dark:bg-slate-900 outline-none font-mono text-lg w-full">
+            <input id="${id}" type="number" step="any" oninput="autoScale('${id}'); validate(this); ${fn}" onkeydown="handleEnter(event, ${fn})" placeholder="0.00" class="flex-grow p-4 bg-white dark:bg-slate-900 outline-none font-mono text-lg w-full">
             <select id="${id}_u" onchange="${fn}" class="bg-slate-100 dark:bg-slate-800 border-none text-[10px] font-bold px-2 outline-none cursor-pointer">
                 ${SI_MAP.map(s => `<option value="${s.e}" ${s.e===0?'selected':''}>${s.l}</option>`).join('')}
             </select>
@@ -213,14 +227,25 @@ function field(id, label, fn, isTarget = false) {
     </div>`;
 }
 
+// SMART UNIT SCALING
+function autoScale(id) {
+    const input = document.getElementById(id);
+    const select = document.getElementById(id + '_u');
+    let val = parseFloat(input.value);
+    if (isNaN(val) || val === 0) return;
+
+    if (val >= 1000) {
+        val = val / 1000;
+        input.value = val.toFixed(3);
+        select.value = parseInt(select.value) + 3;
+    }
+}
+
 function handleEnter(e, fn) { if(e.key === 'Enter') fn(); }
 
 function validate(input) {
-    if(input.value < 0) {
-        input.classList.add('input-error');
-    } else {
-        input.classList.remove('input-error');
-    }
+    if(input.value < 0) input.classList.add('input-error');
+    else input.classList.remove('input-error');
 }
 
 function getVal(id) {
@@ -238,9 +263,13 @@ function formatResult(val, unit) {
     return `${num} ${p.p}${unit}`;
 }
 
-// History Logic
+// FIXED HISTORY LOGIC
 function addToHistory(calcName, formula, result) {
     if(result === "—" || result.includes("NaN")) return;
+    
+    // Check for duplicates
+    if(history.length > 0 && history[0].res === result && history[0].name === calcName) return;
+
     const entry = {
         id: Date.now(),
         name: calcName,
@@ -258,9 +287,12 @@ function renderHistory() {
     const list = document.getElementById('history-list');
     list.innerHTML = history.map(h => `
         <div class="history-card">
-            <div class="flex justify-between opacity-50 mb-1"><span>${h.name}</span><span>${h.time}</span></div>
-            <div class="font-bold text-brand-600">${h.res}</div>
-            <div class="text-[9px] mt-1 text-slate-400 italic">${h.formula}</div>
+            <div class="flex justify-between items-center opacity-70 mb-2">
+                <span class="font-bold uppercase tracking-tighter text-[9px]">${h.name}</span>
+                <span class="text-[9px]">${h.time}</span>
+            </div>
+            <div class="text-base font-bold text-brand-600 dark:text-brand-500">${h.res}</div>
+            <div class="text-[9px] mt-2 text-slate-400 italic border-t dark:border-slate-700 pt-1">${h.formula}</div>
         </div>
     `).join('');
 }
@@ -276,33 +308,50 @@ function copyToClipboard(id) {
     navigator.clipboard.writeText(text);
 }
 
-// Navigation
-function openCalc(id) {
-    document.getElementById('dashboard').classList.add('hidden-view');
-    document.getElementById('calc-container').classList.remove('hidden-view');
-    document.querySelectorAll('.calc-view').forEach(v => v.classList.add('hidden-view'));
-    document.getElementById(id).classList.remove('hidden-view');
-    
-    // Auto-focus logic
-    setTimeout(() => {
-        const firstInput = document.getElementById(id).querySelector('input');
-        if(firstInput) firstInput.focus();
-    }, 100);
+// RC CHART LOGIC
+function updateRCChart(tau) {
+    const ctx = document.getElementById('rcChart').getContext('2d');
+    const dataPoints = [];
+    const labels = [];
+    const steps = 50;
+    const maxT = 5 * tau;
 
-    if(id==='calc-ohm') setOhmTarget('V');
-    if(id==='calc-div') setDivLoad(false);
-    if(id==='calc-rc') setRCTarget('T');
-    if(id==='calc-wave') setWaveTarget('L');
-    if(id==='calc-power') setPowerTarget('P');
-    if(id==='calc-color') initColors();
+    for (let i = 0; i <= steps; i++) {
+        let t = (maxT / steps) * i;
+        let uc = 100 * (1 - Math.exp(-t / tau)); // Normalized to 100%
+        dataPoints.push(uc.toFixed(2));
+        labels.push((t / tau).toFixed(1) + "τ");
+    }
+
+    if (rcChart) rcChart.destroy();
+
+    rcChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Voltage Uc (%)',
+                data: dataPoints,
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { min: 0, max: 100, ticks: { callback: v => v + '%' } },
+                x: { title: { display: true, text: 'Time in Tau (τ)' } }
+            }
+        }
+    });
 }
 
-function showDashboard() { 
-    document.getElementById('calc-container').classList.add('hidden-view');
-    document.getElementById('dashboard').classList.remove('hidden-view');
-}
-
-// Modules with History Integration
+// MODULES
 let ohmT = 'V';
 function setOhmTarget(t) {
     ohmT = t;
@@ -311,7 +360,7 @@ function setOhmTarget(t) {
     const inp = document.getElementById('ohm-inputs');
     if(t==='V') inp.innerHTML = field('o_r','Resistance (Ω)','calcOhm()')+field('o_i','Current (A)','calcOhm()')+field('','Voltage (V)','',true);
     if(t==='I') inp.innerHTML = field('o_v','Voltage (V)','calcOhm()')+field('o_r','Resistance (Ω)','calcOhm()')+field('','Current (A)','',true);
-    if(t==='R') inp.innerHTML = field('o_v','Voltage (V)','calcOhm()')+field('o_i','Current (A)','calcOhm()')+field('','Resistance (Ω)','',true);
+    if(t==='R') inp.innerHTML = field('o_v','Voltage (V)','calcOhm()')+field('o_r','Resistance (Ω)','calcOhm()')+field('','Resistance (Ω)','',true);
     updateFormula('formula-ohm', t==='V'?'V = R \\cdot I':t==='I'?'I = \\frac{V}{R}':'R = \\frac{V}{I}');
     calcOhm();
 }
@@ -349,6 +398,33 @@ function calcDiv(){
     if(res) addToHistory("Voltage Divider", "Vout Calculation", formatted);
 }
 
+let rcT = 'T';
+function setRCTarget(t) {
+    rcT = t;
+    const btns = [['T','Time (τ)'], ['R','Resistance'], ['C','Capacitance']];
+    document.getElementById('rc-modes').innerHTML = btns.map(b => `<button onclick="setRCTarget('${b[0]}')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all ${rcT===b[0] ? 'bg-brand-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}">Find ${b[1]}</button>`).join('');
+    const inp = document.getElementById('rc-inputs');
+    if(t==='T') inp.innerHTML = field('rc_r','Resistance (Ω)','calcRC()')+field('rc_c','Capacitance (F)','calcRC()')+field('','Time Constant (τ)','',true);
+    if(t==='R') inp.innerHTML = field('rc_t','Time (τ)','calcRC()')+field('rc_c','Capacitance (F)','calcRC()')+field('','Resistance (Ω)','',true);
+    if(t==='C') inp.innerHTML = field('rc_t','Time (τ)','calcRC()')+field('rc_r','Resistance (Ω)','calcRC()')+field('','Capacitance (F)','',true);
+    updateFormula('formula-rc', t==='T'?'\\tau = R \\cdot C':t==='R'?'R = \\frac{\\tau}{C}':'C = \\frac{\\tau}{R}');
+    calcRC();
+}
+function calcRC(){
+    let r=getVal('rc_r'), c=getVal('rc_c'), t=getVal('rc_t'), res=null;
+    if(rcT==='T' && r && c) res=r*c;
+    if(rcT==='R' && t && c) res=t/c;
+    if(rcT==='C' && t && r) res=t/r;
+    const formatted = formatResult(res, rcT==='T'?'s':rcT==='R'?'Ω':'F');
+    document.getElementById('rc-res').innerText = formatted;
+    if(res) {
+        addToHistory("RC Time", "Tau Calculation", formatted);
+        if(rcT === 'T') updateRCChart(res);
+        else if (r && c) updateRCChart(r*c);
+    }
+}
+
+// Resistor Colors
 const COLORS = ["Black","Brown","Red","Orange","Yellow","Green","Blue","Violet","Gray","White"];
 const COLOR_VALS = {"Black":"black","Brown":"brown","Red":"red","Orange":"orange","Yellow":"#fbbf24","Green":"green","Blue":"blue","Violet":"violet","Gray":"gray","White":"white","Gold":"#d4af37","Silver":"#c0c0c0"};
 const MULTI = { Black:0, Brown:1, Red:2, Orange:3, Yellow:4, Green:5, Blue:6, Gold:-1, Silver:-2 };
@@ -370,91 +446,71 @@ function updateColors() {
     document.getElementById('color-res').innerText = formatResult(val, 'Ω') + " ±" + t + "%";
 }
 
-let rcT = 'T';
-function setRCTarget(t) {
-    rcT = t;
-    const btns = [['T','Time (τ)'], ['R','Resistance'], ['C','Capacitance']];
-    document.getElementById('rc-modes').innerHTML = btns.map(b => `<button onclick="setRCTarget('${b[0]}')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all ${rcT===b[0] ? 'bg-brand-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}">Find ${b[1]}</button>`).join('');
-    const inp = document.getElementById('rc-inputs');
-    if(t==='T') inp.innerHTML = field('rc_r','Resistance (Ω)','calcRC()')+field('rc_c','Capacitance (F)','calcRC()')+field('','Time Constant (τ)','',true);
-    if(t==='R') inp.innerHTML = field('rc_t','Time (τ)','calcRC()')+field('rc_c','Capacitance (F)','calcRC()')+field('','Resistance (Ω)','',true);
-    if(t==='C') inp.innerHTML = field('rc_t','Time (τ)','calcRC()')+field('rc_r','Resistance (Ω)','calcRC()')+field('','Capacitance (F)','',true);
-    updateFormula('formula-rc', t==='T'?'\\tau = R \\cdot C':t==='R'?'R = \\frac{\\tau}{C}':'C = \\frac{\\tau}{R}');
-    calcRC();
-}
-function calcRC(){
-    let r=getVal('rc_r'), c=getVal('rc_c'), t=getVal('rc_t'), res=null;
-    if(rcT==='T' && r && c) res=r*c;
-    if(rcT==='R' && t && c) res=t/c;
-    if(rcT==='C' && t && r) res=t/r;
-    const formatted = formatResult(res, rcT==='T'?'s':rcT==='R'?'Ω':'F');
-    document.getElementById('rc-res').innerText = formatted;
-    if(res) addToHistory("RC Time", "Tau Calculation", formatted);
-}
-
-let wvT = 'L';
-const lightC = 299792458;
-function setWaveTarget(t) {
-    wvT = t;
-    const btns = [['L','Wavelength (λ)'], ['F','Frequency (f)']];
-    document.getElementById('wave-modes').innerHTML = btns.map(b => `<button onclick="setWaveTarget('${b[0]}')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all ${wvT===b[0] ? 'bg-brand-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}">Find ${b[1]}</button>`).join('');
-    const inp = document.getElementById('wave-inputs');
-    if(t==='L') inp.innerHTML = field('wv_f','Frequency (Hz)','calcWave()')+field('','Wavelength (λ)','',true);
-    if(t==='F') inp.innerHTML = field('wv_l','Wavelength (m)','calcWave()')+field('','Frequency (Hz)','',true);
-    updateFormula('formula-wave', t==='L'?'\\lambda = \\frac{c}{f}':'f = \\frac{c}{\\lambda}');
-    calcWave();
-}
-function calcWave(){
-    let f=getVal('wv_f'), l=getVal('wv_l'), res=null;
-    if(wvT==='L' && f) res=lightC/f;
-    if(wvT==='F' && l) res=lightC/l;
-    const formatted = formatResult(res, wvT==='L'?'m':'Hz');
-    document.getElementById('wave-res').innerText = formatted;
-    if(res) addToHistory("Wavelength", "Speed of Light constant", formatted);
-}
-
-let pT = 'P';
-function setPowerTarget(t) {
-    pT = t;
-    const btns = [['P','Power (W)'], ['V','Voltage'], ['I','Current']];
-    document.getElementById('power-modes').innerHTML = btns.map(b => `<button onclick="setPowerTarget('${b[0]}')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all ${pT===b[0] ? 'bg-brand-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}">Find ${b[1]}</button>`).join('');
-    const inp = document.getElementById('power-inputs');
-    if(t==='P') inp.innerHTML = field('p_v','Voltage (V)','calcPower()')+field('p_i','Current (A)','calcPower()')+field('','Power (W)','',true);
-    if(t==='V') inp.innerHTML = field('p_p','Power (W)','calcPower()')+field('p_i','Current (A)','calcPower()')+field('','Voltage (V)','',true);
-    if(t==='I') inp.innerHTML = field('p_p','Power (W)','calcPower()')+field('p_v','Voltage (V)','calcPower()')+field('','Current (A)','',true);
-    updateFormula('formula-power', t==='P'?'P = V \\cdot I':t==='V'?'V = \\frac{P}{I}':'I = \\frac{P}{V}');
-    calcPower();
-}
-function calcPower(){
-    let p=getVal('p_p'), v=getVal('p_v'), i=getVal('p_i'), res=null;
-    if(pT==='P' && v && i) res=v*i;
-    if(pT==='V' && p && i) res=p/i;
-    if(pT==='I' && p && v) res=p/v;
-    const formatted = formatResult(res, pT==='P'?'W':pT);
-    document.getElementById('power-res').innerText = formatted;
-    if(res) addToHistory("Power", "P=V*I", formatted);
-}
-
+// PDF EXPORT
 function exportToPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    const res = document.querySelector('.calc-view:not(.hidden-view) div[id$="-res"]').innerText;
-    doc.setFontSize(22);
-    doc.text("EngiCalc Pro Protocol", 20, 20);
-    doc.setFontSize(12);
-    doc.text(`User: Simon`, 20, 35);
-    doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 42);
-    doc.text(`Result: ${res}`, 20, 55);
-    doc.save("EngiCalc_Protocol.pdf");
+    const activeView = document.querySelector('.calc-view:not(.hidden-view)');
+    const res = activeView.querySelector('div[id$="-res"]').innerText;
+    const title = activeView.id.replace('calc-', '').toUpperCase();
+
+    // Header Styling
+    doc.setFillColor(37, 99, 235);
+    doc.rect(0, 0, 210, 40, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.text("EngiCalc Pro Protocol", 20, 25);
+    
+    // Details
+    doc.setTextColor(50, 50, 50);
+    doc.setFontSize(10);
+    doc.text(`CREATOR: SIMON`, 20, 50);
+    doc.text(`DATE: ${new Date().toLocaleDateString()} | ${new Date().toLocaleTimeString()}`, 20, 56);
+    doc.line(20, 60, 190, 60);
+
+    // Results Table
+    doc.setFontSize(14);
+    doc.text(`Calculation: ${title} Suite`, 20, 75);
+    doc.setFontSize(18);
+    doc.setTextColor(37, 99, 235);
+    doc.text(`FINAL RESULT: ${res}`, 20, 90);
+    
+    doc.setTextColor(150, 150, 150);
+    doc.setFontSize(8);
+    doc.text("Generated by EngiCalc Pro Precision Suite - Internal Protocol", 20, 280);
+
+    doc.save(`EngiCalc_Protocol_${title}.pdf`);
 }
 
+// Nav and Dark Mode
 function toggleDark() { document.documentElement.classList.toggle('dark'); }
 function toggleSidebar() { 
     document.getElementById('sidebar').classList.toggle('hidden-view'); 
     renderHistory();
 }
+function openCalc(id) {
+    document.getElementById('dashboard').classList.add('hidden-view');
+    document.getElementById('calc-container').classList.remove('hidden-view');
+    document.querySelectorAll('.calc-view').forEach(v => v.classList.add('hidden-view'));
+    document.getElementById(id).classList.remove('hidden-view');
+    
+    setTimeout(() => {
+        const firstInput = document.getElementById(id).querySelector('input');
+        if(firstInput) firstInput.focus();
+    }, 100);
 
-// Init
+    if(id==='calc-ohm') setOhmTarget('V');
+    if(id==='calc-div') setDivLoad(false);
+    if(id==='calc-rc') setRCTarget('T');
+    if(id==='calc-wave') setWaveTarget('L');
+    if(id==='calc-power') setPowerTarget('P');
+    if(id==='calc-color') initColors();
+}
+function showDashboard() { 
+    document.getElementById('calc-container').classList.add('hidden-view');
+    document.getElementById('dashboard').classList.remove('hidden-view');
+}
+
 window.onload = () => { renderHistory(); };
 </script>
 </body>
