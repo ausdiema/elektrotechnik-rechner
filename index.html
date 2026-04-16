@@ -15,28 +15,21 @@
     <style>
         body { font-family: 'Inter', sans-serif; transition: background-color 0.3s; }
         .glow-result { text-shadow: 0 0 15px rgba(37, 99, 235, 0.4); }
-        .kb-text h3 { @apply font-bold text-slate-800 dark:text-slate-200 mt-4 mb-1 text-xs uppercase; }
-        .kb-text p { @apply text-[11px] text-slate-500 leading-relaxed mb-2; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        /* Dashboard Transitions */
+        .view-transition { transition: all 0.3s ease-in-out; }
+        .hidden-view { display: none; opacity: 0; transform: translateY(10px); }
+        .active-view { display: block; opacity: 1; transform: translateY(0); }
         
         #sidebar { display: none; position: fixed; right: 0; top: 0; height: 100%; width: 100%; z-index: 100; }
         @media (min-width: 768px) { #sidebar { width: 320px; } }
         #sidebar.open { display: block; }
-        
-        main { position: relative; z-index: 10; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        @media print { .no-print { display: none; } }
-
-        .schematic-svg { width: 100%; height: auto; max-width: 200px; margin: 0 auto; display: block; }
-        .schematic-text { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 11px; fill: currentColor; }
-        
-        .tooltip { position: relative; display: inline-block; cursor: help; }
-        .tooltip .tooltiptext { visibility: hidden; width: 140px; background-color: #1e293b; color: #fff; text-align: center; border-radius: 6px; padding: 5px; position: absolute; z-index: 1; bottom: 125%; left: 50%; margin-left: -70px; opacity: 0; transition: opacity 0.3s; font-size: 10px; }
-        .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen">
 
-<div id="sidebar" class="bg-white dark:bg-slate-900 shadow-2xl p-6 border-l dark:border-slate-800 no-print">
+<div id="sidebar" class="bg-white dark:bg-slate-900 shadow-2xl p-6 border-l dark:border-slate-800">
     <div class="flex justify-between items-center mb-6">
         <h3 class="font-bold uppercase text-xs tracking-widest text-brand-600">Calculation History</h3>
         <button onclick="toggleSidebar()" class="text-slate-400 hover:text-red-500 text-2xl">✕</button>
@@ -44,121 +37,115 @@
     <div id="history-list" class="space-y-3 overflow-y-auto max-h-[85vh] text-[11px] font-mono"></div>
 </div>
 
-<header class="max-w-6xl mx-auto p-6 flex justify-between items-center no-print">
-    <div class="flex items-center space-x-2">
+<header class="max-w-6xl mx-auto p-6 flex justify-between items-center">
+    <div class="flex items-center space-x-2 cursor-pointer" onclick="showDashboard()">
         <div class="bg-brand-600 p-2 rounded-lg shadow-lg"><span class="text-white text-2xl">⚡</span></div>
         <h1 class="text-2xl font-bold tracking-tight uppercase italic">EngiCalc <span class="text-brand-600">Pro</span></h1>
     </div>
     <div class="flex space-x-2">
-        <button onclick="window.print()" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-brand-600 transition text-lg">📄</button>
         <button onclick="toggleSidebar()" class="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-brand-600 transition text-xs font-bold uppercase tracking-wider">📜 History</button>
         <button onclick="toggleDark()" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 transition text-xl">🌙</button>
     </div>
 </header>
 
-<main class="max-w-7xl mx-auto p-6 grid gap-8 md:grid-cols-2 lg:grid-cols-3 items-start">
-    
-    <div id="card-ohm" class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
-        <div class="flex justify-between items-center mb-1">
-            <h2 class="text-xl font-bold text-brand-600">Ohm's Law</h2>
-            <button onclick="resetSection('ohm-inputs', 'ohm-res')" class="text-[10px] font-bold text-slate-400 hover:text-red-500 uppercase tracking-tighter">Reset</button>
-        </div>
-        <div class="flex items-center space-x-2 mb-4">
-            <code class="text-[10px] font-bold opacity-70 italic">V = R × I</code>
-            <div class="tooltip text-slate-400 text-xs">ⓘ<span class="tooltiptext">Standard: V in Volts, I in Amps, R in Ohms</span></div>
-        </div>
-        <select id="ohm_m" onchange="renderOhm()" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-bold mb-6 cursor-pointer">
-            <option value="UI">Solve for R & P (Given V, I)</option>
-            <option value="UR">Solve for I & P (Given V, R)</option>
-            <option value="IR">Solve for V & P (Given I, R)</option>
-        </select>
-        <div id="ohm-inputs" class="space-y-4 mb-6"></div>
-        <div id="ohm-res" class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-lg font-mono font-bold glow-result">—</div>
-        <div class="kb-text mt-4"><h3>Context</h3><p>Relationship between Voltage, Current, and Resistance.</p></div>
+<div id="dashboard" class="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 active-view">
+    <div onclick="openCalc('calc-ohm')" class="group bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 hover:border-brand-600 transition-all cursor-pointer hover:shadow-xl hover:-translate-y-1">
+        <span class="text-3xl mb-4 block">🔌</span>
+        <h2 class="text-xl font-bold mb-1">Ohm's Law</h2>
+        <p class="text-slate-400 text-xs font-mono uppercase">V = R × I</p>
     </div>
 
-    <div id="card-div" class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
-        <div class="flex justify-between items-start mb-2">
-            <div>
-                <h2 class="text-xl font-bold text-brand-600">Voltage Divider</h2>
-                <code id="div-formula" class="text-[10px] font-bold opacity-70 italic">Vout = Vin × (R2 / (R1+R2))</code>
-                <div class="tooltip text-slate-400 text-[10px] ml-1">ⓘ<span class="tooltiptext">R in Ω, Vin/Vout in V</span></div>
-            </div>
-            <div class="flex flex-col items-end space-y-2">
-                <button onclick="resetSection('div-inputs-wrapper', 'div-res')" class="text-[10px] font-bold text-slate-400 hover:text-red-500 uppercase tracking-tighter">Reset</button>
-                <select id="div_mode" onchange="updateDivUI()" class="text-[10px] font-bold uppercase p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border-none outline-none cursor-pointer">
+    <div onclick="openCalc('calc-div')" class="group bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 hover:border-brand-600 transition-all cursor-pointer hover:shadow-xl hover:-translate-y-1">
+        <span class="text-3xl mb-4 block">📏</span>
+        <h2 class="text-xl font-bold mb-1">Voltage Divider</h2>
+        <p class="text-slate-400 text-xs font-mono uppercase">Vout = Vin × (R2/Rtotal)</p>
+    </div>
+
+    <div onclick="openCalc('calc-vd')" class="group bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 hover:border-brand-600 transition-all cursor-pointer hover:shadow-xl hover:-translate-y-1">
+        <span class="text-3xl mb-4 block">📉</span>
+        <h2 class="text-xl font-bold mb-1">Voltage Drop</h2>
+        <p class="text-slate-400 text-xs font-mono uppercase">ΔV = (2·L·I) / (κ·A)</p>
+    </div>
+</div>
+
+<div id="calc-container" class="max-w-4xl mx-auto p-6 hidden-view">
+    <button onclick="showDashboard()" class="mb-6 text-sm font-bold text-slate-400 hover:text-brand-600 transition flex items-center">
+        ← BACK TO DASHBOARD
+    </button>
+
+    <div id="calc-ohm" class="calc-view hidden-view">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-8 border border-slate-100 dark:border-slate-800">
+            <h2 class="text-3xl font-bold text-brand-600 mb-6">Ohm's Law</h2>
+            <select id="ohm_m" onchange="renderOhm()" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-bold mb-8">
+                <option value="UI">Solve for R & P (Given V, I)</option>
+                <option value="UR">Solve for I & P (Given V, R)</option>
+                <option value="IR">Solve for V & P (Given I, R)</option>
+            </select>
+            <div id="ohm-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"></div>
+            <div id="ohm-res" class="p-6 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-2xl font-mono font-bold glow-result text-center">—</div>
+        </div>
+    </div>
+
+    <div id="calc-div" class="calc-view hidden-view">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-8 border border-slate-100 dark:border-slate-800">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold text-brand-600">Voltage Divider</h2>
+                <select id="div_mode" onchange="updateDivUI()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-bold uppercase">
                     <option value="unloaded">Unloaded</option>
                     <option value="loaded">Loaded</option>
                 </select>
             </div>
-        </div>
-
-        <div class="py-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl mb-6 border border-slate-100 dark:border-slate-700/50">
-            <svg id="div-svg" class="schematic-svg text-slate-400 dark:text-slate-500" viewBox="0 0 160 160">
-                <path d="M60,10 L60,30 M60,60 L60,80 M60,110 L60,130" fill="none" stroke="currentColor" stroke-width="2"/>
-                <rect x="50" y="30" width="20" height="30" fill="none" stroke="currentColor" stroke-width="2"/>
-                <rect x="50" y="80" width="20" height="30" fill="none" stroke="currentColor" stroke-width="2"/>
-                <path d="M50,130 L70,130 M55,135 L65,135 M58,140 L62,140" stroke="currentColor" stroke-width="2"/>
-                <path d="M60,80 L140,80" fill="none" stroke="currentColor" stroke-width="2"/>
-                <g id="load-path" class="hidden">
-                    <path d="M130,80 L130,90 M130,120 L130,130 L60,130" fill="none" stroke="currentColor" stroke-width="2"/>
-                    <rect x="120" y="90" width="20" height="30" fill="none" stroke="currentColor" stroke-width="2"/>
-                    <text x="145" y="110" class="schematic-text fill-brand-600">RL</text>
-                </g>
-                <text x="15" y="20" class="schematic-text fill-brand-600">Vin</text>
-                <text x="75" y="50" class="schematic-text">R1</text>
-                <text x="75" y="100" class="schematic-text">R2</text>
-                <text x="100" y="75" class="schematic-text fill-brand-600">Vout</text>
-            </svg>
-        </div>
-
-        <div id="div-inputs-wrapper" class="space-y-4 mb-6">
-            <div id="f_vin"></div><div id="f_r1"></div><div id="f_r2"></div><div id="f_rl" class="hidden"></div>
-        </div>
-
-        <div class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800">
-            <span class="text-[10px] font-bold text-brand-600 uppercase block mb-1 tracking-widest">Output Voltage (Vout)</span>
-            <div id="div-res" class="text-lg font-mono font-bold glow-result">—</div>
+            <div id="div-inputs-wrapper" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div id="f_vin"></div><div id="f_r1"></div><div id="f_r2"></div><div id="f_rl" class="hidden"></div>
+            </div>
+            <div id="div-res" class="p-6 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-2xl font-mono font-bold glow-result text-center">—</div>
         </div>
     </div>
 
-    <div id="card-vd" class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col hover:-translate-y-1 transition-all">
-        <div class="flex justify-between items-center mb-1">
-            <h2 class="text-xl font-bold text-brand-600">Voltage Drop</h2>
-            <button onclick="resetSection('vd-inputs', 'vd-res')" class="text-[10px] font-bold text-slate-400 hover:text-red-500 uppercase tracking-tighter">Reset</button>
+    <div id="calc-vd" class="calc-view hidden-view">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-8 border border-slate-100 dark:border-slate-800">
+            <h2 class="text-3xl font-bold text-brand-600 mb-6">Voltage Drop</h2>
+            <div id="vd-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"></div>
+            <div class="mb-8">
+                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-2">Material Conductivity (κ)</label>
+                <select id="vd_kappa" onchange="calcVD()" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-bold">
+                    <option value="56">Copper (κ=56)</option>
+                    <option value="35">Aluminum (κ=35)</option>
+                </select>
+            </div>
+            <div id="vd-res" class="p-6 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-2xl font-mono font-bold glow-result text-center">—</div>
         </div>
-        <div class="flex items-center space-x-2 mb-4">
-            <code class="text-[10px] font-bold opacity-70 italic">ΔV = (2·L·I) / (κ·A)</code>
-            <div class="tooltip text-slate-400 text-xs">ⓘ<span class="tooltiptext">L in meters, I in Amps, A in mm²</span></div>
-        </div>
-        
-        <div id="vd-inputs" class="space-y-4 mb-6"></div>
-
-        <div class="mb-4">
-            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Material Conductivity (κ)</label>
-            <select id="vd_kappa" onchange="calcVD()" class="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-bold cursor-pointer">
-                <option value="56">Copper (κ=56)</option>
-                <option value="35">Aluminum (κ=35)</option>
-            </select>
-        </div>
-
-        <div id="vd-res" class="p-4 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-lg font-mono font-bold glow-result">—</div>
     </div>
-
-</main>
+</div>
 
 <script>
+// --- NAVIGATION LOGIC ---
+function openCalc(id) {
+    document.getElementById('dashboard').classList.remove('active-view');
+    document.getElementById('dashboard').classList.add('hidden-view');
+    
+    document.getElementById('calc-container').classList.remove('hidden-view');
+    document.getElementById('calc-container').classList.add('active-view');
+    
+    document.querySelectorAll('.calc-view').forEach(v => v.classList.add('hidden-view'));
+    document.getElementById(id).classList.remove('hidden-view');
+    document.getElementById(id).classList.add('active-view');
+}
+
+function showDashboard() {
+    document.getElementById('calc-container').classList.add('hidden-view');
+    document.getElementById('calc-container').classList.remove('active-view');
+    
+    document.getElementById('dashboard').classList.add('active-view');
+    document.getElementById('dashboard').classList.remove('hidden-view');
+}
+
 // --- UTILITIES ---
 function toggleDark() { document.documentElement.classList.toggle('dark'); }
 function toggleSidebar() { 
     const s = document.getElementById('sidebar');
     s.classList.toggle('open');
     if(s.classList.contains('open')) renderHistory();
-}
-
-function resetSection(inputId, resId) {
-    document.getElementById(inputId).querySelectorAll('input').forEach(i => i.value = '');
-    document.getElementById(resId).innerText = '—';
 }
 
 function formatValue(val, unit) {
@@ -173,40 +160,30 @@ function convert(v, u) {
 }
 
 function field(id, label, icon, fn) {
-    return `<div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">${label}</label>
-    <div class="flex space-x-2"><div class="relative flex-grow">
-    <span class="absolute left-3 top-1/2 -translate-y-1/2 opacity-50">${icon}</span>
-    <input id="${id}" type="number" min="0" step="any" oninput="${fn}" class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono focus:ring-1 focus:ring-brand-600 transition">
-    </div><select id="${id}_u" onchange="${fn}" class="w-16 p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-[10px] font-bold outline-none border-none cursor-pointer">
-    <option value="">unit</option><option value="m">m</option><option value="k">k</option><option value="M">M</option></select></div></div>`;
+    return `<div>
+        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">${label}</label>
+        <div class="flex space-x-2">
+            <div class="relative flex-grow">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 opacity-50">${icon}</span>
+                <input id="${id}" type="number" step="any" oninput="${fn}" class="w-full pl-9 pr-3 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono focus:ring-2 focus:ring-brand-600 transition">
+            </div>
+            <select id="${id}_u" onchange="${fn}" class="w-20 p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-xs font-bold outline-none border-none">
+                <option value="">Base</option>
+                <option value="m">milli</option>
+                <option value="k">kilo</option>
+                <option value="M">Mega</option>
+            </select>
+        </div>
+    </div>`;
 }
 
 function getVal(id) { 
     const el = document.getElementById(id);
     if(!el || !el.value) return 0;
-    let v = parseFloat(el.value);
-    if(v < 0) { el.value = 0; v = 0; } // Security validation
-    return convert(v, document.getElementById(id+"_u").value); 
+    return convert(parseFloat(el.value), document.getElementById(id+"_u").value); 
 }
 
-// --- CALCULATION LOGIC ---
-function calcDiv() {
-    let vin = getVal("v_in"), r1 = getVal("v_r1"), r2 = getVal("v_r2"), rl = getVal("v_rl");
-    let isLoaded = document.getElementById('div_mode').value === 'loaded';
-    if(vin && r1 && r2) {
-        let vout = isLoaded && rl ? vin * (((r2*rl)/(r2+rl)) / (r1 + ((r2*rl)/(r2+rl)))) : vin * (r2 / (r1 + r2));
-        document.getElementById('div-res').innerText = formatValue(vout, 'V');
-        saveToHistory(`Divider: ${formatValue(vout, 'V')}`);
-    }
-}
-
-function updateDivUI() {
-    const isL = document.getElementById('div_mode').value === 'loaded';
-    document.getElementById('f_rl').classList.toggle('hidden', !isL);
-    document.getElementById('load-path').classList.toggle('hidden', !isL);
-    calcDiv();
-}
-
+// --- LOGIC (REUSED FROM YOUR CODE) ---
 function renderOhm() {
     let m = document.getElementById("ohm_m").value, h = "";
     if(m==="UI") { h+=field("o_u","Voltage (V)","🔌","calcOhm()"); h+=field("o_i","Current (I)","🚀","calcOhm()"); }
@@ -224,8 +201,20 @@ function calcOhm() {
     if(res) { document.getElementById("ohm-res").innerText = res; saveToHistory("Ohm's: " + res); }
 }
 
-function renderVD() {
-    document.getElementById("vd-inputs").innerHTML = field("vd_i","Current (I)","🚀","calcVD()") + field("vd_l","Length (m)","📏","calcVD()") + field("vd_a","Cross-section (A)","⬛","calcVD()");
+function calcDiv() {
+    let vin = getVal("v_in"), r1 = getVal("v_r1"), r2 = getVal("v_r2"), rl = getVal("v_rl");
+    let isLoaded = document.getElementById('div_mode').value === 'loaded';
+    if(vin && r1 && r2) {
+        let vout = isLoaded && rl ? vin * (((r2*rl)/(r2+rl)) / (r1 + ((r2*rl)/(r2+rl)))) : vin * (r2 / (r1 + r2));
+        document.getElementById('div-res').innerText = formatValue(vout, 'V');
+        saveToHistory(`Divider: ${formatValue(vout, 'V')}`);
+    }
+}
+
+function updateDivUI() {
+    const isL = document.getElementById('div_mode').value === 'loaded';
+    document.getElementById('f_rl').classList.toggle('hidden', !isL);
+    calcDiv();
 }
 
 function calcVD() {
@@ -237,7 +226,6 @@ function calcVD() {
     }
 }
 
-// --- HISTORY ---
 function saveToHistory(t) {
     let h = JSON.parse(localStorage.getItem('engiHistory') || '[]');
     if(h.length > 0 && h[0].text === t) return;
@@ -255,7 +243,8 @@ document.getElementById('f_vin').innerHTML = field("v_in", "Supply (Vin)", "🔋
 document.getElementById('f_r1').innerHTML = field("v_r1", "Resistor R1", "🚧", "calcDiv()");
 document.getElementById('f_r2').innerHTML = field("v_r2", "Resistor R2", "🚧", "calcDiv()");
 document.getElementById('f_rl').innerHTML = field("v_rl", "Load RL", "🎯", "calcDiv()");
-renderOhm(); renderVD();
+document.getElementById("vd-inputs").innerHTML = field("vd_i","Current (I)","🚀","calcVD()") + field("vd_l","Length (m)","📏","calcVD()") + field("vd_a","Cross-section (A)","⬛","calcVD()");
+renderOhm();
 </script>
 </body>
 </html>
