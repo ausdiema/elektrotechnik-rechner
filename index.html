@@ -17,11 +17,17 @@
         .glow-result { text-shadow: 0 0 15px rgba(37, 99, 235, 0.4); }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         
-        /* Dashboard Transitions */
-        .view-transition { transition: all 0.3s ease-in-out; }
-        .hidden-view { display: none; opacity: 0; transform: translateY(10px); }
-        .active-view { display: block; opacity: 1; transform: translateY(0); }
+        .view-transition { transition: all 0.2s ease-in-out; }
+        .hidden-view { display: none !important; }
         
+        /* Pulse Animation for results */
+        @keyframes resultPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); background-color: rgba(37, 99, 235, 0.1); }
+            100% { transform: scale(1); }
+        }
+        .pulse-active { animation: resultPulse 0.4s ease-out; }
+
         #sidebar { display: none; position: fixed; right: 0; top: 0; height: 100%; width: 100%; z-index: 100; }
         @media (min-width: 768px) { #sidebar { width: 320px; } }
         #sidebar.open { display: block; }
@@ -31,7 +37,7 @@
 
 <div id="sidebar" class="bg-white dark:bg-slate-900 shadow-2xl p-6 border-l dark:border-slate-800">
     <div class="flex justify-between items-center mb-6">
-        <h3 class="font-bold uppercase text-xs tracking-widest text-brand-600">Calculation History</h3>
+        <h3 class="font-bold uppercase text-xs tracking-widest text-brand-600">History Log</h3>
         <button onclick="toggleSidebar()" class="text-slate-400 hover:text-red-500 text-2xl">✕</button>
     </div>
     <div id="history-list" class="space-y-3 overflow-y-auto max-h-[85vh] text-[11px] font-mono"></div>
@@ -48,99 +54,124 @@
     </div>
 </header>
 
-<div id="dashboard" class="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 active-view">
-    <div onclick="openCalc('calc-ohm')" class="group bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 hover:border-brand-600 transition-all cursor-pointer hover:shadow-xl hover:-translate-y-1">
+<div id="dashboard" class="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div onclick="openCalc('calc-ohm')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 hover:border-brand-600 transition-all cursor-pointer hover:shadow-xl group">
         <span class="text-3xl mb-4 block">🔌</span>
-        <h2 class="text-xl font-bold mb-1">Ohm's Law</h2>
-        <p class="text-slate-400 text-xs font-mono uppercase">V = R × I</p>
+        <h2 class="text-xl font-bold mb-1 group-hover:text-brand-600">Ohm's Law</h2>
+        <p class="text-slate-400 text-xs font-mono uppercase">V = R × I | P = V × I</p>
     </div>
 
-    <div onclick="openCalc('calc-div')" class="group bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 hover:border-brand-600 transition-all cursor-pointer hover:shadow-xl hover:-translate-y-1">
+    <div onclick="openCalc('calc-div')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 hover:border-brand-600 transition-all cursor-pointer hover:shadow-xl group">
         <span class="text-3xl mb-4 block">📏</span>
-        <h2 class="text-xl font-bold mb-1">Voltage Divider</h2>
-        <p class="text-slate-400 text-xs font-mono uppercase">Vout = Vin × (R2/Rtotal)</p>
+        <h2 class="text-xl font-bold mb-1 group-hover:text-brand-600">Voltage Divider</h2>
+        <p class="text-slate-400 text-xs font-mono uppercase">Vout Calculation</p>
     </div>
 
-    <div onclick="openCalc('calc-vd')" class="group bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 hover:border-brand-600 transition-all cursor-pointer hover:shadow-xl hover:-translate-y-1">
+    <div onclick="openCalc('calc-vd')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 hover:border-brand-600 transition-all cursor-pointer hover:shadow-xl group">
         <span class="text-3xl mb-4 block">📉</span>
-        <h2 class="text-xl font-bold mb-1">Voltage Drop</h2>
-        <p class="text-slate-400 text-xs font-mono uppercase">ΔV = (2·L·I) / (κ·A)</p>
+        <h2 class="text-xl font-bold mb-1 group-hover:text-brand-600">Voltage Drop</h2>
+        <p class="text-slate-400 text-xs font-mono uppercase">Loss over distance</p>
     </div>
 </div>
 
-<div id="calc-container" class="max-w-4xl mx-auto p-6 hidden-view">
+<div id="calc-container" class="max-w-5xl mx-auto p-6 hidden-view">
     <button onclick="showDashboard()" class="mb-6 text-sm font-bold text-slate-400 hover:text-brand-600 transition flex items-center">
         ← BACK TO DASHBOARD
     </button>
 
-    <div id="calc-ohm" class="calc-view hidden-view">
+    <section id="calc-ohm" class="calc-view hidden-view">
         <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-8 border border-slate-100 dark:border-slate-800">
-            <h2 class="text-3xl font-bold text-brand-600 mb-6">Ohm's Law</h2>
-            <select id="ohm_m" onchange="renderOhm()" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-bold mb-8">
-                <option value="UI">Solve for R & P (Given V, I)</option>
-                <option value="UR">Solve for I & P (Given V, R)</option>
-                <option value="IR">Solve for V & P (Given I, R)</option>
+            <h2 class="text-3xl font-bold text-brand-600 mb-2">Ohm's Law</h2>
+            <p class="text-slate-400 text-xs mb-6 italic uppercase tracking-widest font-mono">Precision Component Analysis</p>
+            
+            <select id="ohm_m" onchange="renderOhm()" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border-none ring-1 ring-slate-200 dark:ring-slate-700 text-sm font-bold mb-8">
+                <option value="UI">Solve for R & P (Known: V, I)</option>
+                <option value="UR">Solve for I & P (Known: V, R)</option>
+                <option value="IR">Solve for V & P (Known: I, R)</option>
             </select>
-            <div id="ohm-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"></div>
-            <div id="ohm-res" class="p-6 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-2xl font-mono font-bold glow-result text-center">—</div>
-        </div>
-    </div>
 
-    <div id="calc-div" class="calc-view hidden-view">
+            <div id="ohm-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"></div>
+            
+            <div id="ohm-res-box" class="relative p-6 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-center">
+                <span class="text-[10px] font-bold text-brand-600 uppercase block mb-2">Computed Results</span>
+                <div id="ohm-res" class="text-2xl font-mono font-bold glow-result">—</div>
+                <button onclick="copyToClipboard('ohm-res')" class="mt-4 text-[10px] text-slate-400 hover:text-brand-600 font-bold uppercase tracking-widest underline">Copy Result</button>
+            </div>
+            <div class="mt-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl text-[11px] text-slate-500 border border-slate-100 dark:border-slate-700">
+                <strong>Engineer's Note:</strong> Ensure current density is within fuse ratings before applying high voltage.
+            </div>
+        </div>
+    </section>
+
+    <section id="calc-div" class="calc-view hidden-view">
         <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-8 border border-slate-100 dark:border-slate-800">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-3xl font-bold text-brand-600">Voltage Divider</h2>
-                <select id="div_mode" onchange="updateDivUI()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-bold uppercase">
-                    <option value="unloaded">Unloaded</option>
-                    <option value="loaded">Loaded</option>
+                <select id="div_mode" onchange="updateDivUI()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-bold uppercase border-none">
+                    <option value="unloaded">Unloaded (Ideal)</option>
+                    <option value="loaded">Loaded (Actual)</option>
                 </select>
             </div>
             <div id="div-inputs-wrapper" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div id="f_vin"></div><div id="f_r1"></div><div id="f_r2"></div><div id="f_rl" class="hidden"></div>
             </div>
-            <div id="div-res" class="p-6 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-2xl font-mono font-bold glow-result text-center">—</div>
+            <div id="div-res-box" class="p-6 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-center">
+                <span class="text-[10px] font-bold text-brand-600 uppercase block mb-1">Vout Potential</span>
+                <div id="div-res" class="text-2xl font-mono font-bold glow-result">—</div>
+                <button onclick="copyToClipboard('div-res')" class="mt-4 text-[10px] text-slate-400 hover:text-brand-600 font-bold uppercase tracking-widest underline">Copy Result</button>
+            </div>
+            <div class="mt-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl text-[11px] text-slate-500 border border-slate-100 dark:border-slate-700">
+                <strong>Note:</strong> Loading a divider shifts the output voltage based on $R_L || R_2$.
+            </div>
         </div>
-    </div>
+    </section>
 
-    <div id="calc-vd" class="calc-view hidden-view">
+    <section id="calc-vd" class="calc-view hidden-view">
         <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-8 border border-slate-100 dark:border-slate-800">
             <h2 class="text-3xl font-bold text-brand-600 mb-6">Voltage Drop</h2>
             <div id="vd-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"></div>
-            <div class="mb-8">
-                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-2">Material Conductivity (κ)</label>
-                <select id="vd_kappa" onchange="calcVD()" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-bold">
-                    <option value="56">Copper (κ=56)</option>
-                    <option value="35">Aluminum (κ=35)</option>
+            <div class="mb-8 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl">
+                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-2">Conductor Material (κ)</label>
+                <select id="vd_kappa" onchange="calcVD()" class="w-full p-4 rounded-xl bg-white dark:bg-slate-900 border-none ring-1 ring-slate-200 dark:ring-slate-700 text-sm font-bold">
+                    <option value="56">Copper (κ = 56 m/Ω·mm²)</option>
+                    <option value="35">Aluminum (κ = 35 m/Ω·mm²)</option>
                 </select>
             </div>
-            <div id="vd-res" class="p-6 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-2xl font-mono font-bold glow-result text-center">—</div>
+            <div id="vd-res-box" class="p-6 bg-brand-50 dark:bg-brand-900/20 rounded-2xl border border-brand-100 dark:border-brand-800 text-center">
+                <span class="text-[10px] font-bold text-brand-600 uppercase block mb-1">Total Loss (ΔV)</span>
+                <div id="vd-res" class="text-2xl font-mono font-bold glow-result">—</div>
+                <button onclick="copyToClipboard('vd-res')" class="mt-4 text-[10px] text-slate-400 hover:text-brand-600 font-bold uppercase tracking-widest underline">Copy Result</button>
+            </div>
+            <div class="mt-6 p-4 bg-red-50 dark:bg-red-900/10 rounded-xl text-[11px] text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/30">
+                <strong>Safety Alert:</strong> High drops (>3%) indicate excessive heat and energy waste. Increase cross-section (A).
+            </div>
         </div>
-    </div>
+    </section>
 </div>
 
 <script>
-// --- NAVIGATION LOGIC ---
+// --- CORE ROUTING (SENIOR FIX) ---
 function openCalc(id) {
-    document.getElementById('dashboard').classList.remove('active-view');
     document.getElementById('dashboard').classList.add('hidden-view');
-    
     document.getElementById('calc-container').classList.remove('hidden-view');
-    document.getElementById('calc-container').classList.add('active-view');
     
-    document.querySelectorAll('.calc-view').forEach(v => v.classList.add('hidden-view'));
-    document.getElementById(id).classList.remove('hidden-view');
-    document.getElementById(id).classList.add('active-view');
+    // Strict separation: hide all views, then show the target
+    document.querySelectorAll('.calc-view').forEach(v => {
+        v.classList.add('hidden-view');
+        v.classList.remove('active-view');
+    });
+    
+    const target = document.getElementById(id);
+    target.classList.remove('hidden-view');
+    target.classList.add('active-view');
 }
 
 function showDashboard() {
     document.getElementById('calc-container').classList.add('hidden-view');
-    document.getElementById('calc-container').classList.remove('active-view');
-    
-    document.getElementById('dashboard').classList.add('active-view');
     document.getElementById('dashboard').classList.remove('hidden-view');
 }
 
-// --- UTILITIES ---
+// --- REFINED UTILITIES ---
 function toggleDark() { document.documentElement.classList.toggle('dark'); }
 function toggleSidebar() { 
     const s = document.getElementById('sidebar');
@@ -148,30 +179,39 @@ function toggleSidebar() {
     if(s.classList.contains('open')) renderHistory();
 }
 
-function formatValue(val, unit) {
-    if (val === 0) return "0 " + unit;
-    if (Math.abs(val) < 0.001) return val.toExponential(2) + " " + unit;
-    return val.toLocaleString(undefined, {maximumFractionDigits: 4}) + " " + unit;
+function copyToClipboard(id) {
+    const text = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(text);
+    alert('Value copied to clipboard!');
 }
 
-function convert(v, u) { 
-    const f = { 'm':1e-3, 'k':1e3, 'M':1e6 };
-    return f[u] ? v * f[u] : v; 
+function triggerPulse(id) {
+    const box = document.getElementById(id + '-box');
+    box.classList.remove('pulse-active');
+    void box.offsetWidth; // Force reflow
+    box.classList.add('pulse-active');
 }
+
+// --- SI PREFIX ENGINE ---
+const SI_PREFIXES = {
+    'M': 1e6, 'k': 1e3, '': 1, 'm': 1e-3, 'u': 1e-6, 'n': 1e-9
+};
 
 function field(id, label, icon, fn) {
-    return `<div>
-        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">${label}</label>
-        <div class="flex space-x-2">
+    return `<div class="group">
+        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1 group-focus-within:text-brand-600">${label}</label>
+        <div class="flex space-x-1">
             <div class="relative flex-grow">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 opacity-50">${icon}</span>
-                <input id="${id}" type="number" step="any" oninput="${fn}" class="w-full pl-9 pr-3 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono focus:ring-2 focus:ring-brand-600 transition">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 opacity-30">${icon}</span>
+                <input id="${id}" type="number" step="any" oninput="${fn}" class="w-full pl-9 pr-3 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono focus:ring-2 focus:ring-brand-600 transition peer">
             </div>
-            <select id="${id}_u" onchange="${fn}" class="w-20 p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-xs font-bold outline-none border-none">
-                <option value="">Base</option>
-                <option value="m">milli</option>
-                <option value="k">kilo</option>
-                <option value="M">Mega</option>
+            <select id="${id}_u" onchange="${fn}" class="w-24 p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-[9px] font-bold outline-none border-none cursor-pointer">
+                <option value="M">Mega (M) 10⁶</option>
+                <option value="k">Kilo (k) 10³</option>
+                <option value="" selected>Base (10⁰)</option>
+                <option value="m">Milli (m) 10⁻³</option>
+                <option value="u">Micro (µ) 10⁻⁶</option>
+                <option value="n">Nano (n) 10⁻⁹</option>
             </select>
         </div>
     </div>`;
@@ -180,10 +220,25 @@ function field(id, label, icon, fn) {
 function getVal(id) { 
     const el = document.getElementById(id);
     if(!el || !el.value) return 0;
-    return convert(parseFloat(el.value), document.getElementById(id+"_u").value); 
+    const val = parseFloat(el.value);
+    
+    // Validation: Visual feedback for negatives in engineering tools
+    if (val < 0) { el.classList.add('ring-red-500'); } 
+    else { el.classList.remove('ring-red-500'); }
+
+    const unit = document.getElementById(id+"_u").value;
+    return val * (SI_PREFIXES[unit] || 1); 
 }
 
-// --- LOGIC (REUSED FROM YOUR CODE) ---
+function formatValue(val, unit) {
+    if (val === 0) return "0 " + unit;
+    if (Math.abs(val) >= 1e6) return (val/1e6).toFixed(3) + " M" + unit;
+    if (Math.abs(val) >= 1e3) return (val/1e3).toFixed(3) + " k" + unit;
+    if (Math.abs(val) < 0.001) return val.toExponential(3) + " " + unit;
+    return val.toLocaleString(undefined, {maximumFractionDigits: 4}) + " " + unit;
+}
+
+// --- LOGIC ---
 function renderOhm() {
     let m = document.getElementById("ohm_m").value, h = "";
     if(m==="UI") { h+=field("o_u","Voltage (V)","🔌","calcOhm()"); h+=field("o_i","Current (I)","🚀","calcOhm()"); }
@@ -198,7 +253,11 @@ function calcOhm() {
     if(m==="UI" && u && i) res=`R: ${formatValue(u/i, 'Ω')} | P: ${formatValue(u*i, 'W')}`;
     else if(m==="UR" && u && r) res=`I: ${formatValue(u/r, 'A')} | P: ${formatValue(u**2/r, 'W')}`;
     else if(m==="IR" && i && r) res=`V: ${formatValue(i*r, 'V')} | P: ${formatValue(i**2*r, 'W')}`;
-    if(res) { document.getElementById("ohm-res").innerText = res; saveToHistory("Ohm's: " + res); }
+    if(res) { 
+        document.getElementById("ohm-res").innerText = res; 
+        saveToHistory("Ohm's: " + res);
+        triggerPulse('ohm-res');
+    }
 }
 
 function calcDiv() {
@@ -208,6 +267,7 @@ function calcDiv() {
         let vout = isLoaded && rl ? vin * (((r2*rl)/(r2+rl)) / (r1 + ((r2*rl)/(r2+rl)))) : vin * (r2 / (r1 + r2));
         document.getElementById('div-res').innerText = formatValue(vout, 'V');
         saveToHistory(`Divider: ${formatValue(vout, 'V')}`);
+        triggerPulse('div-res');
     }
 }
 
@@ -223,6 +283,7 @@ function calcVD() {
         let v = (2*l*i)/(k*a);
         document.getElementById("vd-res").innerText = "ΔV: " + formatValue(v, 'V');
         saveToHistory(`VDrop: ${formatValue(v, 'V')}`);
+        triggerPulse('vd-res');
     }
 }
 
@@ -238,7 +299,7 @@ function renderHistory() {
     document.getElementById('history-list').innerHTML = h.map(i => `<div class="p-3 border-b dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 rounded-lg mb-2"><span class="text-brand-600 font-bold text-[9px] uppercase">${i.time}</span><br><span class="text-slate-700 dark:text-slate-300">${i.text}</span></div>`).join('') || '<p class="opacity-50 italic text-center py-4">No records.</p>';
 }
 
-// INIT
+// INITIALIZATION
 document.getElementById('f_vin').innerHTML = field("v_in", "Supply (Vin)", "🔋", "calcDiv()");
 document.getElementById('f_r1').innerHTML = field("v_r1", "Resistor R1", "🚧", "calcDiv()");
 document.getElementById('f_r2').innerHTML = field("v_r2", "Resistor R2", "🚧", "calcDiv()");
