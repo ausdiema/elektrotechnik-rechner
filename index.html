@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" id="htmlRoot">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>EngiCalc Pro – Formula Master Suite</title>
+    <title>EngiCalc Pro – Engineering Excellence</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -12,157 +12,187 @@
             theme: { 
                 extend: { 
                     fontFamily: { mono: ['JetBrains Mono', 'monospace'], sans: ['Inter', 'sans-serif'] },
-                    colors: { brand: { 50: '#f0f7ff', 600: '#2563eb', 900: '#1e3a8a' } } 
+                    colors: { brand: { 50: '#f8fafc', 600: '#2563eb', 900: '#1e3a8a' } } 
                 } 
             }
         }
     </script>
     <style>
-        .formula-display { font-family: 'serif'; font-style: italic; }
         .hidden-view { display: none !important; }
+        .formula-card { background: rgba(0,0,0,0.03); border-radius: 1rem; padding: 1.5rem; margin-bottom: 2rem; }
+        .dark .formula-card { background: rgba(255,255,255,0.05); }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         
-        @keyframes pulse-blue {
-            0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
-            70% { box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        .ring-select { height: 45px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
         }
-        .calculate-pulse { animation: pulse-blue 0.5s ease-out; }
-
-        #sidebar { display: none; position: fixed; right: 0; top: 0; height: 100%; width: 100%; z-index: 100; transition: transform 0.3s ease; }
-        @media (min-width: 768px) { #sidebar { width: 350px; } }
-        #sidebar.open { display: block; }
+        .calc-trigger { animation: pulse-ring 2s infinite; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen font-sans">
 
-<div id="sidebar" class="bg-white dark:bg-slate-900 shadow-2xl p-6 border-l dark:border-slate-800">
+<div id="sidebar" class="fixed right-0 top-0 h-full w-full md:w-80 bg-white dark:bg-slate-900 shadow-2xl z-50 p-6 border-l dark:border-slate-800 hidden-view">
     <div class="flex justify-between items-center mb-8">
-        <h3 class="font-bold uppercase text-xs tracking-[0.2em] text-brand-600">Lab History</h3>
-        <button onclick="toggleSidebar()" class="text-slate-400 hover:text-red-500 transition">✕</button>
+        <h3 class="font-bold text-xs tracking-widest text-brand-600">HISTORY LOG</h3>
+        <button onclick="toggleSidebar()" class="text-2xl">✕</button>
     </div>
-    <div id="history-list" class="space-y-4 overflow-y-auto max-h-[80vh] font-mono text-[10px]"></div>
+    <div id="history-list" class="space-y-4 overflow-y-auto max-h-[85vh] font-mono text-[10px]"></div>
 </div>
 
-<header class="max-w-6xl mx-auto p-8 flex justify-between items-center">
+<header class="max-w-6xl mx-auto p-6 flex justify-between items-center">
     <div class="flex items-center space-x-3 cursor-pointer" onclick="showDashboard()">
-        <div class="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center shadow-lg shadow-brand-600/20">
-            <span class="text-white font-bold">Σ</span>
-        </div>
-        <h1 class="text-xl font-bold tracking-tighter uppercase">EngiCalc <span class="text-brand-600">Pro</span></h1>
+        <div class="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg">⚡</div>
+        <h1 class="text-xl font-bold tracking-tighter">ENGICALC <span class="text-brand-600">PRO</span></h1>
     </div>
     <div class="flex items-center space-x-4">
-        <button onclick="toggleSidebar()" class="text-[10px] font-bold uppercase tracking-widest opacity-50 hover:opacity-100 transition">History</button>
-        <button onclick="toggleDark()" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-sm">🌓</button>
+        <button onclick="toggleSidebar()" class="text-[10px] font-bold tracking-widest opacity-60">LOG</button>
+        <button onclick="toggleDark()" class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center">🌓</button>
     </div>
 </header>
 
-<main id="dashboard" class="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-8">
-    <div onclick="openCalc('calc-ohm')" class="group bg-white dark:bg-slate-900 p-10 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 hover:border-brand-600 transition-all cursor-pointer shadow-sm hover:shadow-2xl hover:-translate-y-2">
-        <div class="text-4xl mb-6">⚙️</div>
-        <h2 class="text-2xl font-bold mb-2">Fundamental</h2>
-        <p class="text-slate-400 font-mono text-xs italic">V = R · I</p>
+<main id="dashboard" class="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div onclick="openCalc('calc-ohm')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm transition-all">
+        <h2 class="text-lg font-bold">Ohm's Law</h2>
+        <p class="text-xs text-slate-500 font-mono mt-2">V = R · I</p>
     </div>
-    <div onclick="openCalc('calc-div')" class="group bg-white dark:bg-slate-900 p-10 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 hover:border-brand-600 transition-all cursor-pointer shadow-sm hover:shadow-2xl hover:-translate-y-2">
-        <div class="text-4xl mb-6">💎</div>
-        <h2 class="text-2xl font-bold mb-2">Ratio</h2>
-        <p class="text-slate-400 font-mono text-xs italic">Vout = Vin · (R2/Rtot)</p>
+    <div onclick="openCalc('calc-power')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm transition-all">
+        <h2 class="text-lg font-bold">Electrical Power</h2>
+        <p class="text-xs text-slate-500 font-mono mt-2">P = V · I | P = I² · R</p>
     </div>
-    <div onclick="openCalc('calc-vd')" class="group bg-white dark:bg-slate-900 p-10 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 hover:border-brand-600 transition-all cursor-pointer shadow-sm hover:shadow-2xl hover:-translate-y-2">
-        <div class="text-4xl mb-6">📉</div>
-        <h2 class="text-2xl font-bold mb-2">Conduction</h2>
-        <p class="text-slate-400 font-mono text-xs italic">ΔV = (2·L·I)/(κ·A)</p>
+    <div onclick="openCalc('calc-color')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm transition-all">
+        <h2 class="text-lg font-bold">Resistor Color Code</h2>
+        <p class="text-xs text-slate-500 font-mono mt-2">4-Band Decoder</p>
+    </div>
+    <div onclick="openCalc('calc-react')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm transition-all">
+        <h2 class="text-lg font-bold">Capacitive Reactance</h2>
+        <p class="text-xs text-slate-500 font-mono mt-2">Xc = 1 / (2πfC)</p>
+    </div>
+    <div onclick="openCalc('calc-vd')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm transition-all">
+        <h2 class="text-lg font-bold">Voltage Drop</h2>
+        <p class="text-xs text-slate-500 font-mono mt-2">ΔV = (2·L·I) / (κ·A)</p>
     </div>
 </main>
 
-<div id="calc-container" class="max-w-4xl mx-auto p-6 hidden-view">
-    <button onclick="showDashboard()" class="mb-10 text-[10px] font-bold text-slate-400 hover:text-brand-600 tracking-[0.3em] flex items-center transition">
-        <span class="mr-2">←</span> RETURN TO TERMINAL
-    </button>
+<div id="calc-container" class="max-w-[800px] mx-auto p-6 hidden-view">
+    <button onclick="showDashboard()" class="mb-8 text-[10px] font-bold text-slate-400 hover:text-brand-600 tracking-widest">← BACK TO DASHBOARD</button>
 
-    <div id="calc-ohm" class="calc-view hidden-view bg-white dark:bg-slate-900 rounded-[3rem] p-12 shadow-2xl border border-slate-100 dark:border-slate-800">
-        <div class="text-center mb-12">
-            <div class="text-5xl font-serif italic mb-4 text-slate-800 dark:text-slate-200 tracking-widest">$V = R \cdot I$</div>
-            <div class="h-1 w-20 bg-brand-600 mx-auto rounded-full opacity-30"></div>
+    <section id="calc-ohm" class="calc-view hidden-view bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 md:p-12 border border-slate-200 dark:border-slate-800 shadow-xl">
+        <h2 class="text-2xl font-bold mb-2">Ohm's Law</h2>
+        <div class="formula-card text-center">
+            <span class="text-3xl font-serif italic text-brand-600">$V = R \cdot I$</span>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12" id="ohm-fields">
-            </div>
-
-        <div class="border-t dark:border-slate-800 pt-10">
-            <h3 class="text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-6 text-center">What is missing?</h3>
-            <div class="flex justify-center space-x-3 mb-10">
-                <button onclick="setOhmMode('V')" id="btn-ohm-V" class="ohm-mode-btn px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-xs transition hover:bg-brand-600 hover:text-white">Voltage (V)</button>
-                <button onclick="setOhmMode('R')" id="btn-ohm-R" class="ohm-mode-btn px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-xs transition hover:bg-brand-600 hover:text-white">Resistance (R)</button>
-                <button onclick="setOhmMode('I')" id="btn-ohm-I" class="ohm-mode-btn px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-xs transition hover:bg-brand-600 hover:text-white">Current (I)</button>
-            </div>
-
-            <div id="ohm-result-box" class="p-10 bg-slate-50 dark:bg-slate-800/50 rounded-[2rem] text-center border border-slate-100 dark:border-slate-700 transition-all">
-                <div id="ohm-res" class="text-4xl font-mono font-bold text-brand-600">—</div>
-                <button onclick="copyToClipboard('ohm-res')" class="mt-6 text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-brand-600 underline transition">Copy to Clipboard</button>
-            </div>
+        <div id="ohm-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"></div>
+        <div class="border-t dark:border-slate-800 pt-8 text-center">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">What are you looking for?</p>
+            <div class="flex flex-wrap justify-center gap-2 mb-8" id="ohm-modes"></div>
+            <div id="ohm-res" class="text-4xl font-mono font-bold text-brand-600 p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl">—</div>
         </div>
-    </div>
+    </section>
 
-    <div id="calc-vd" class="calc-view hidden-view bg-white dark:bg-slate-900 rounded-[3rem] p-12 shadow-2xl border border-slate-100 dark:border-slate-800">
-        <div class="text-center mb-12">
-            <div class="text-4xl font-serif italic mb-4 text-slate-800 dark:text-slate-200 tracking-widest">$\Delta V = \frac{2 \cdot L \cdot I}{\kappa \cdot A}$</div>
-            <div class="h-1 w-20 bg-brand-600 mx-auto rounded-full opacity-30"></div>
+    <section id="calc-power" class="calc-view hidden-view bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 md:p-12 border border-slate-200 dark:border-slate-800 shadow-xl">
+        <h2 class="text-2xl font-bold mb-2">Electrical Power</h2>
+        <div class="formula-card text-center">
+            <span class="text-3xl font-serif italic text-brand-600">$P = V \cdot I$</span>
         </div>
+        <div id="power-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"></div>
+        <div class="border-t dark:border-slate-800 pt-8 text-center">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Solve for</p>
+            <div class="flex flex-wrap justify-center gap-2 mb-8" id="power-modes"></div>
+            <div id="power-res" class="text-4xl font-mono font-bold text-brand-600 p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl">—</div>
+        </div>
+    </section>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-            <div id="vd-f-i"></div>
-            <div id="vd-f-l"></div>
-            <div id="vd-f-a"></div>
+    <section id="calc-color" class="calc-view hidden-view bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 md:p-12 border border-slate-200 dark:border-slate-800 shadow-xl">
+        <h2 class="text-2xl font-bold mb-6">Resistor 4-Band</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+            <div><label class="text-[10px] font-bold block mb-2">Band 1</label><select id="c1" onchange="calcColor()" class="w-full ring-select bg-slate-100 dark:bg-slate-800 text-black dark:text-white"></select></div>
+            <div><label class="text-[10px] font-bold block mb-2">Band 2</label><select id="c2" onchange="calcColor()" class="w-full ring-select bg-slate-100 dark:bg-slate-800 text-black dark:text-white"></select></div>
+            <div><label class="text-[10px] font-bold block mb-2">Multiplier</label><select id="c3" onchange="calcColor()" class="w-full ring-select bg-slate-100 dark:bg-slate-800 text-black dark:text-white"></select></div>
+            <div><label class="text-[10px] font-bold block mb-2">Tolerance</label><select id="c4" onchange="calcColor()" class="w-full ring-select bg-slate-100 dark:bg-slate-800 text-black dark:text-white"></select></div>
+        </div>
+        <div id="color-res" class="text-4xl font-mono font-bold text-brand-600 p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl text-center">—</div>
+    </section>
+
+    <section id="calc-react" class="calc-view hidden-view bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 md:p-12 border border-slate-200 dark:border-slate-800 shadow-xl">
+        <h2 class="text-2xl font-bold mb-2">Capacitive Reactance</h2>
+        <div class="formula-card text-center">
+            <span class="text-3xl font-serif italic text-brand-600">$X_c = \frac{1}{2 \pi f C}$</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div id="f_react_f"></div>
+            <div id="f_react_c"></div>
+        </div>
+        <div id="react-res" class="text-4xl font-mono font-bold text-brand-600 p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl text-center">—</div>
+    </section>
+
+    <section id="calc-vd" class="calc-view hidden-view bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 md:p-12 border border-slate-200 dark:border-slate-800 shadow-xl">
+        <h2 class="text-2xl font-bold mb-2">Voltage Drop</h2>
+        <div class="formula-card text-center">
+            <span class="text-3xl font-serif italic text-brand-600">$\Delta V = \frac{2 \cdot L \cdot I}{\kappa \cdot A}$</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div id="vd_i"></div><div id="vd_l"></div><div id="vd_a"></div>
             <div>
-                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Material (κ)</label>
-                <select id="vd_kappa" onchange="calcVD()" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border-none ring-1 ring-slate-200 dark:ring-slate-700 text-sm font-bold">
+                <label class="text-[10px] font-bold text-slate-400 block mb-2 uppercase">Material (κ)</label>
+                <select id="vd_k" onchange="calcVD()" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border-none ring-1 ring-slate-200 dark:ring-slate-700 text-sm font-bold">
                     <option value="56">Copper (56)</option>
                     <option value="35">Aluminum (35)</option>
                 </select>
             </div>
         </div>
-
-        <div id="vd-result-box" class="p-10 bg-slate-50 dark:bg-slate-800/50 rounded-[2rem] text-center border border-slate-100 dark:border-slate-700">
-            <div id="vd-res" class="text-4xl font-mono font-bold text-brand-600">—</div>
-            <p class="text-[10px] text-slate-400 mt-4 uppercase tracking-widest font-bold">Total Potential Drop</p>
-            <button onclick="copyToClipboard('vd-res')" class="mt-6 text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-brand-600 underline transition">Copy to Clipboard</button>
-        </div>
-    </div>
+        <div id="vd-res" class="text-4xl font-mono font-bold text-brand-600 p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl text-center">—</div>
+    </section>
 </div>
 
 <script>
-// --- SI ENGINE ---
 const SI = { 'G': 1e9, 'M': 1e6, 'k': 1e3, '': 1, 'm': 1e-3, 'u': 1e-6, 'n': 1e-9 };
 
 function field(id, label, icon, fn) {
-    return `<div class="space-y-2">
+    return `<div class="space-y-1">
         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">${label}</label>
-        <div class="flex space-x-2">
+        <div class="flex space-x-1">
             <div class="relative flex-grow">
-                <span class="absolute left-4 top-1/2 -translate-y-1/2 opacity-20 text-lg">${icon}</span>
-                <input id="${id}" type="number" step="any" oninput="${fn}" placeholder="0.00" class="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none text-sm font-mono focus:ring-2 focus:ring-brand-600 transition">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 opacity-20">${icon}</span>
+                <input id="${id}" type="number" step="any" oninput="${fn}" placeholder="0.0" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 outline-none font-mono text-sm focus:ring-2 focus:ring-brand-600">
             </div>
-            <select id="${id}_u" onchange="${fn}" class="w-28 p-2 rounded-2xl bg-slate-100 dark:bg-slate-800 text-[10px] font-bold outline-none border-none cursor-pointer">
-                <option value="G">Giga (G) 10⁹</option>
-                <option value="M">Mega (M) 10⁶</option>
-                <option value="k">Kilo (k) 10³</option>
-                <option value="" selected>Base (10⁰)</option>
-                <option value="m">Milli (m) 10⁻³</option>
-                <option value="u">Micro (µ) 10⁻⁶</option>
-                <option value="n">Nano (n) 10⁻⁹</option>
+            <select id="${id}_u" onchange="${fn}" class="w-24 p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-[10px] font-bold border-none outline-none">
+                <option value="G">Giga</option><option value="M">Mega</option><option value="k">Kilo</option>
+                <option value="" selected>Base</option><option value="m">Milli</option><option value="u">Micro</option><option value="n">Nano</option>
             </select>
         </div>
     </div>`;
 }
 
-// --- CORE NAVIGATION ---
+function getVal(id) {
+    const el = document.getElementById(id);
+    if(!el || !el.value) return 0;
+    return parseFloat(el.value) * SI[document.getElementById(id+'_u').value];
+}
+
+function format(val, unit) {
+    if(val === 0) return "0 " + unit;
+    const abs = Math.abs(val);
+    if(abs >= 1e9) return (val/1e9).toFixed(2) + " G" + unit;
+    if(abs >= 1e6) return (val/1e6).toFixed(2) + " M" + unit;
+    if(abs >= 1e3) return (val/1e3).toFixed(2) + " k" + unit;
+    if(abs < 1e-6) return (val*1e9).toFixed(2) + " n" + unit;
+    if(abs < 1e-3) return (val*1e6).toFixed(2) + " µ" + unit;
+    if(abs < 1) return (val*1e3).toFixed(2) + " m" + unit;
+    return val.toLocaleString(undefined, {maximumFractionDigits: 3}) + " " + unit;
+}
+
+// NAVIGATION
 function openCalc(id) {
     document.getElementById('dashboard').classList.add('hidden-view');
     document.getElementById('calc-container').classList.remove('hidden-view');
     document.querySelectorAll('.calc-view').forEach(v => v.classList.add('hidden-view'));
     document.getElementById(id).classList.remove('hidden-view');
-    if(id === 'calc-ohm') setOhmMode('V');
+    if(id==='calc-ohm') setMode('ohm', 'V', ['V','R','I']);
+    if(id==='calc-power') setMode('power', 'P', ['P','V','I']);
 }
 
 function showDashboard() {
@@ -170,99 +200,88 @@ function showDashboard() {
     document.getElementById('dashboard').classList.remove('hidden-view');
 }
 
-// --- LOGIC: OHM ---
-let currentOhmMode = 'V';
-function setOhmMode(mode) {
-    currentOhmMode = mode;
-    document.querySelectorAll('.ohm-mode-btn').forEach(b => b.classList.remove('bg-brand-600', 'text-white'));
-    document.getElementById('btn-ohm-' + mode).classList.add('bg-brand-600', 'text-white');
+// LOGIC: DYNAMIC MODES (Ohm & Power)
+let modes = { ohm: 'V', power: 'P' };
+function setMode(calc, m, all) {
+    modes[calc] = m;
+    const container = document.getElementById(calc+'-modes');
+    container.innerHTML = all.map(x => `<button onclick="setMode('${calc}','${x}',['${all.join("','")}'])" class="px-6 py-2 rounded-full border text-[10px] font-bold transition ${modes[calc]===x?'bg-brand-600 text-white border-brand-600':'border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'}">${x}</button>`).join('');
     
-    let container = document.getElementById('ohm-fields');
-    if(mode === 'V') container.innerHTML = field('o_r', 'Resistance (R)', '🚧', 'calcOhm()') + field('o_i', 'Current (I)', '🚀', 'calcOhm()');
-    if(mode === 'R') container.innerHTML = field('o_v', 'Voltage (V)', '🔌', 'calcOhm()') + field('o_i', 'Current (I)', '🚀', 'calcOhm()');
-    if(mode === 'I') container.innerHTML = field('o_v', 'Voltage (V)', '🔌', 'calcOhm()') + field('o_r', 'Resistance (R)', '🚧', 'calcOhm()');
-    document.getElementById('ohm-res').innerText = '—';
-}
-
-function calcOhm() {
-    let v = getVal('o_v'), r = getVal('o_r'), i = getVal('o_i');
-    let res = 0, unit = "";
-    if(currentOhmMode === 'V' && r && i) { res = r * i; unit = "V"; }
-    else if(currentOhmMode === 'R' && v && i) { res = v / i; unit = "Ω"; }
-    else if(currentOhmMode === 'I' && v && r) { res = v / r; unit = "A"; }
-    
-    if(res) displayRes('ohm-res', res, unit);
-}
-
-// --- LOGIC: VOLTAGE DROP ---
-function calcVD() {
-    let i = getVal('vd_i'), l = getVal('vd_l'), a = getVal('vd_a'), k = parseFloat(document.getElementById('vd_kappa').value);
-    if(i && l && a) {
-        let v = (2 * l * i) / (k * a);
-        displayRes('vd-res', v, "V");
+    const inputs = document.getElementById(calc+'-inputs');
+    if(calc === 'ohm') {
+        if(m==='V') inputs.innerHTML = field('o_r','Resistance (R)','🚧','calcOhm()') + field('o_i','Current (I)','🚀','calcOhm()');
+        if(m==='R') inputs.innerHTML = field('o_v','Voltage (V)','🔌','calcOhm()') + field('o_i','Current (I)','🚀','calcOhm()');
+        if(m==='I') inputs.innerHTML = field('o_v','Voltage (V)','🔌','calcOhm()') + field('o_r','Resistance (R)','🚧','calcOhm()');
+    } else if(calc === 'power') {
+        if(m==='P') inputs.innerHTML = field('p_v','Voltage (V)','🔌','calcPower()') + field('p_i','Current (I)','🚀','calcPower()');
+        if(m==='V') inputs.innerHTML = field('p_p','Power (P)','🔥','calcPower()') + field('p_i','Current (I)','🚀','calcPower()');
+        if(m==='I') inputs.innerHTML = field('p_p','Power (P)','🔥','calcPower()') + field('p_v','Voltage (V)','🔌','calcPower()');
     }
 }
 
-// --- UTILS ---
-function getVal(id) {
-    const el = document.getElementById(id);
-    if(!el || !el.value) return 0;
-    return parseFloat(el.value) * SI[document.getElementById(id + '_u').value];
+function calcOhm() {
+    let v=getVal('o_v'), r=getVal('o_r'), i=getVal('o_i'), res=0, u="";
+    if(modes.ohm==='V') { res=r*i; u="V"; } else if(modes.ohm==='R') { res=v/i; u="Ω"; } else { res=v/r; u="A"; }
+    if(res) { document.getElementById('ohm-res').innerText = format(res, u); save("Ohm: "+format(res,u)); }
 }
 
-function displayRes(targetId, val, unit) {
-    const text = formatValue(val, unit);
-    document.getElementById(targetId).innerText = text;
-    const box = document.getElementById(targetId + '-box');
-    box.classList.remove('calculate-pulse');
-    void box.offsetWidth; 
-    box.classList.add('calculate-pulse');
-    saveToHistory(`${targetId.split('-')[0].toUpperCase()}: ${text}`);
+function calcPower() {
+    let p=getVal('p_p'), v=getVal('p_v'), i=getVal('p_i'), res=0, u="";
+    if(modes.power==='P') { res=v*i; u="W"; } else if(modes.power==='V') { res=p/i; u="V"; } else { res=p/v; u="A"; }
+    if(res) { document.getElementById('power-res').innerText = format(res, u); save("Power: "+format(res,u)); }
 }
 
-function formatValue(val, unit) {
-    if (val === 0) return "0 " + unit;
-    if (val >= 1e9) return (val/1e9).toFixed(3) + " G" + unit;
-    if (val >= 1e6) return (val/1e6).toFixed(3) + " M" + unit;
-    if (val >= 1e3) return (val/1e3).toFixed(3) + " k" + unit;
-    if (val < 1e-6) return (val*1e9).toFixed(2) + " n" + unit;
-    if (val < 1e-3) return (val*1e6).toFixed(2) + " µ" + unit;
-    if (val < 1) return (val*1e3).toFixed(2) + " m" + unit;
-    return val.toLocaleString(undefined, {maximumFractionDigits: 4}) + " " + unit;
+function calcVD() {
+    let i=getVal('vd_i_val'), l=getVal('vd_l_val'), a=getVal('vd_a_val'), k=parseFloat(document.getElementById('vd_k').value);
+    if(i && l && a) { let vd = (2*l*i)/(k*a); document.getElementById('vd-res').innerText = format(vd, "V"); save("VDrop: "+format(vd,"V")); }
 }
 
+function calcReact() {
+    let f=getVal('re_f'), c=getVal('re_c');
+    if(f && c) { let xc = 1/(2*Math.PI*f*c); document.getElementById('react-res').innerText = format(xc, "Ω"); save("Xc: "+format(xc,"Ω")); }
+}
+
+// COLOR CODE LOGIC
+const colors = ["black","brown","red","orange","yellow","green","blue","violet","gray","white"];
+const mults = { black:1, brown:10, red:100, orange:1000, yellow:10000, green:100000, blue:1e6, gold:0.1, silver:0.01 };
+const tols = { brown:1, red:2, green:0.5, blue:0.25, violet:0.1, gray:0.05, gold:5, silver:10 };
+
+function initColor() {
+    const s1=document.getElementById('c1'), s2=document.getElementById('c2'), s3=document.getElementById('c3'), s4=document.getElementById('c4');
+    colors.forEach((c,i) => { 
+        s1.innerHTML+=`<option value="${i}" style="background:${c}">${c.toUpperCase()}</option>`;
+        s2.innerHTML+=`<option value="${i}" style="background:${c}">${c.toUpperCase()}</option>`;
+    });
+    Object.keys(mults).forEach(m => s3.innerHTML+=`<option value="${mults[m]}" style="background:${m}">${m.toUpperCase()}</option>`);
+    Object.keys(tols).forEach(t => s4.innerHTML+=`<option value="${tols[t]}" style="background:${t}">${t.toUpperCase()}</option>`);
+}
+
+function calcColor() {
+    let val = (parseInt(document.getElementById('c1').value)*10 + parseInt(document.getElementById('c2').value)) * parseFloat(document.getElementById('c3').value);
+    let tol = document.getElementById('c4').value;
+    document.getElementById('color-res').innerText = format(val, "Ω") + " ±" + tol + "%";
+}
+
+// UTILS
 function toggleDark() { document.documentElement.classList.toggle('dark'); }
-function toggleSidebar() { 
-    const s = document.getElementById('sidebar');
-    s.classList.toggle('open');
-    if(s.classList.contains('open')) renderHistory();
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('hidden-view'); renderHistory(); }
+function save(t) {
+    let h = JSON.parse(localStorage.getItem('ecp_log') || '[]');
+    h.unshift({time: new Date().toLocaleTimeString(), text: t});
+    localStorage.setItem('ecp_log', JSON.stringify(h.slice(0,12)));
 }
-
-function copyToClipboard(id) {
-    navigator.clipboard.writeText(document.getElementById(id).innerText);
-}
-
-function saveToHistory(t) {
-    let h = JSON.parse(localStorage.getItem('engiHistory') || '[]');
-    if(h.length > 0 && h[0].text === t) return;
-    h.unshift({ time: new Date().toLocaleTimeString(), text: t });
-    localStorage.setItem('engiHistory', JSON.stringify(h.slice(0,10)));
-}
-
 function renderHistory() {
-    const h = JSON.parse(localStorage.getItem('engiHistory') || '[]');
-    document.getElementById('history-list').innerHTML = h.map(i => `
-        <div class="p-4 border-b dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 rounded-xl">
-            <span class="text-brand-600 font-bold opacity-50">${i.time}</span><br>
-            <span class="text-slate-600 dark:text-slate-400 font-bold">${i.text}</span>
-        </div>
-    `).join('') || '<p class="text-center opacity-30 mt-10">NO DATA LOGGED</p>';
+    const h = JSON.parse(localStorage.getItem('ecp_log') || '[]');
+    document.getElementById('history-list').innerHTML = h.map(i => `<div class="p-3 border-b dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 rounded-lg"><span class="text-brand-600 font-bold">${i.time}</span><br>${i.text}</div>`).join('') || 'No records.';
 }
 
-// INIT
-document.getElementById('vd-f-i').innerHTML = field('vd_i', 'Current (I)', '🚀', 'calcVD()');
-document.getElementById('vd-f-l').innerHTML = field('vd_l', 'Length (m)', '📏', 'calcVD()');
-document.getElementById('vd-f-a').innerHTML = field('vd_a', 'Area (mm²)', '⬛', 'calcVD()');
+// INIT FIELDS
+document.getElementById('vd_i').innerHTML = field('vd_i_val','Current (I)','🚀','calcVD()');
+document.getElementById('vd_l').innerHTML = field('vd_l_val','Length (m)','📏','calcVD()');
+document.getElementById('vd_a').innerHTML = field('vd_a_val','Area (mm²)','⬛','calcVD()');
+document.getElementById('f_react_f').innerHTML = field('re_f','Frequency (f)','〰️','calcReact()');
+document.getElementById('f_react_c').innerHTML = field('re_c','Capacitance (C)','🔋','calcReact()');
+initColor();
 </script>
 </body>
 </html>
