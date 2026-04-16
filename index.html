@@ -102,7 +102,7 @@
 <div id="calc-container" class="max-w-4xl mx-auto p-6 hidden-view">
     <div class="flex justify-between items-center mb-8">
         <button onclick="showDashboard()" class="text-[10px] font-bold text-slate-400 hover:text-brand-600 tracking-widest uppercase">← Back to Dashboard</button>
-        <button onclick="exportToPDF()" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest px-4 py-2">Download PDF</button>
+        <button onclick="exportToPDF()" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest">Download PDF</button>
     </div>
 
     <section id="calc-ohm" class="calc-view hidden-view">
@@ -110,7 +110,6 @@
         <div class="mb-6 flex gap-2" id="ohm-modes"></div>
         <div id="ohm-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         <div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Calculated Result</span>
             <div id="ohm-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div>
         </div>
     </section>
@@ -122,6 +121,26 @@
                 <button onclick="setDivLoad(true)" id="btn-loaded" class="px-6 py-2 rounded-lg font-bold text-xs transition-all">Loaded (RL)</button>
             </div>
         </div>
+        
+        <div class="flex justify-center bg-white dark:bg-slate-900 p-6 rounded-3xl mb-8 border dark:border-slate-800">
+            <svg width="240" height="180" viewBox="0 0 240 180" class="text-slate-400">
+                <path d="M40 20 V50 M40 80 V110 M40 140 V160" stroke="currentColor" fill="none" stroke-width="2"/>
+                <rect x="25" y="50" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"/>
+                <rect x="25" y="110" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"/>
+                <text x="65" y="70" font-size="12" fill="currentColor">R1</text>
+                <text x="65" y="130" font-size="12" fill="currentColor">R2</text>
+                <circle cx="40" cy="95" r="3" fill="#3b82f6"/>
+                <path d="M40 95 H100" stroke="#3b82f6" fill="none" stroke-width="2" stroke-dasharray="3"/>
+                <g id="svg-load-group" style="display: none;">
+                    <path d="M100 95 V110 M100 140 V160 H40" stroke="#3b82f6" fill="none" stroke-width="2"/>
+                    <rect x="85" y="110" width="30" height="30" fill="none" stroke="#3b82f6" stroke-width="2"/>
+                    <text x="125" y="130" font-size="12" fill="#3b82f6" font-weight="bold">RL</text>
+                </g>
+                <text x="10" y="20" font-size="10" fill="currentColor">Vin</text>
+                <path d="M30 160 H50 M35 165 H45" stroke="currentColor" stroke-width="1"/>
+            </svg>
+        </div>
+
         <div class="formula-box mb-8" id="formula-div"></div>
         <div id="div-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         <div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800">
@@ -129,58 +148,31 @@
         </div>
     </section>
 
-    <section id="calc-rc" class="calc-view hidden-view">
-        <div class="formula-box mb-8" id="formula-rc"></div>
-        <div class="mb-6 flex gap-2" id="rc-modes"></div>
-        <div id="rc-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-        <div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800">
-            <div id="rc-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div>
-        </div>
-    </section>
-
-    <section id="calc-wave" class="calc-view hidden-view">
-        <div class="formula-box mb-8" id="formula-wave"></div>
-        <div class="mb-6 flex gap-2" id="wave-modes"></div>
-        <div id="wave-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-        <div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800">
-            <div id="wave-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div>
-        </div>
-    </section>
-
-    <section id="calc-power" class="calc-view hidden-view">
-        <div class="formula-box mb-8" id="formula-power"></div>
-        <div class="mb-6 flex gap-2" id="power-modes"></div>
-        <div id="power-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-        <div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800">
-            <div id="power-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div>
-        </div>
-    </section>
-
     <section id="calc-color" class="calc-view hidden-view">
+        <div class="flex justify-center mb-10 py-12 bg-slate-200 dark:bg-slate-800 rounded-3xl">
+            <svg width="300" height="100" viewBox="0 0 300 100">
+                <rect x="0" y="45" width="300" height="10" fill="#94a3b8"/>
+                <rect x="60" y="15" width="180" height="70" rx="20" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                <rect id="b1" x="90" y="15" width="15" height="70" fill="brown"/>
+                <rect id="b2" x="120" y="15" width="15" height="70" fill="black"/>
+                <rect id="b3" x="150" y="15" width="15" height="70" fill="red"/>
+                <rect id="b4" x="200" y="15" width="15" height="70" fill="gold"/>
+            </svg>
+        </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" id="color-selects"></div>
         <div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800">
             <div id="color-res" class="text-4xl font-mono font-bold text-brand-600">—</div>
         </div>
     </section>
 
+    <section id="calc-rc" class="calc-view hidden-view"><div class="formula-box mb-8" id="formula-rc"></div><div class="mb-6 flex gap-2" id="rc-modes"></div><div id="rc-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div><div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800"><div id="rc-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div></div></section>
+    <section id="calc-wave" class="calc-view hidden-view"><div class="formula-box mb-8" id="formula-wave"></div><div class="mb-6 flex gap-2" id="wave-modes"></div><div id="wave-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div><div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800"><div id="wave-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div></div></section>
+    <section id="calc-power" class="calc-view hidden-view"><div class="formula-box mb-8" id="formula-power"></div><div class="mb-6 flex gap-2" id="power-modes"></div><div id="power-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div><div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800"><div id="power-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div></div></section>
+
     <div id="seo-content" class="seo-content mt-16 pt-12 border-t border-slate-200 dark:border-slate-800">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-                <h3 id="theory-title">Theoretical Background</h3>
-                <p id="theory-desc">Select a calculator to learn about the physics and mathematics behind the results.</p>
-            </div>
-            <div>
-                <h3>Industry Application</h3>
-                <p id="industry-desc">These calculations are used in professional fields like Medical Technology and Automotive Engineering.</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="mt-16 p-8 bg-brand-500/5 rounded-3xl border border-brand-500/10 flex flex-col md:flex-row items-center gap-6">
-        <div class="w-16 h-16 rounded-full bg-brand-600 flex items-center justify-center text-white font-bold text-xl">S</div>
-        <div>
-            <h4 class="font-bold text-lg">About the Developer</h4>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Developed by Simon, a dual student of Electrical Engineering and Information Technology at Karl Storz. Dedicated to precision and clean engineering tools.</p>
+            <div><h3 id="theory-title">Theoretical Background</h3><p id="theory-desc">Select a calculator to learn about the physics and mathematics behind the results.</p></div>
+            <div><h3>Industry Application</h3><p id="industry-desc">These calculations are used in professional fields like Medical Technology and Automotive Engineering.</p></div>
         </div>
     </div>
 </div>
@@ -217,7 +209,26 @@ function formatResult(val, unit) {
     return `${num} ${p.p}${unit}`;
 }
 
-// LOGIC (Ohm, Div, RC, Wave, Power, Color)
+// NAVIGATION
+function openCalc(id) {
+    document.getElementById('dashboard').classList.add('hidden-view');
+    document.getElementById('calc-container').classList.remove('hidden-view');
+    document.querySelectorAll('.calc-view').forEach(v => v.classList.add('hidden-view'));
+    document.getElementById(id).classList.remove('hidden-view');
+    if(id==='calc-ohm') setOhmTarget('V');
+    if(id==='calc-div') setDivLoad(false);
+    if(id==='calc-rc') setRCTarget('T');
+    if(id==='calc-wave') setWaveTarget('L');
+    if(id==='calc-power') setPowerTarget('P');
+    if(id==='calc-color') initColors();
+}
+
+function showDashboard() { 
+    document.getElementById('calc-container').classList.add('hidden-view');
+    document.getElementById('dashboard').classList.remove('hidden-view');
+}
+
+// LOGIC MODULES
 let ohmT = 'V';
 function setOhmTarget(t) {
     ohmT = t;
@@ -243,6 +254,7 @@ function setDivLoad(isLoaded) {
     divLoaded = isLoaded;
     document.getElementById('btn-unloaded').className = isLoaded ? 'px-6 py-2 rounded-lg font-bold text-xs' : 'px-6 py-2 rounded-lg font-bold text-xs toggle-active';
     document.getElementById('btn-loaded').className = isLoaded ? 'px-6 py-2 rounded-lg font-bold text-xs toggle-active' : 'px-6 py-2 rounded-lg font-bold text-xs';
+    document.getElementById('svg-load-group').style.display = isLoaded ? 'block' : 'none';
     const inp = document.getElementById('div-inputs');
     let html = field('d_v','Input Voltage (Vin)','calcDiv()')+field('d_r1','Resistor R1 (Ω)','calcDiv()')+field('d_r2','Resistor R2 (Ω)','calcDiv()');
     if(isLoaded) html += field('d_rl', 'Load Resistor RL (Ω)', 'calcDiv()');
@@ -257,6 +269,27 @@ function calcDiv(){
         res = vin * (r2eff / (r1 + r2eff));
     }
     document.getElementById('div-res').innerText = formatResult(res, 'V');
+}
+
+const COLORS = ["Black","Brown","Red","Orange","Yellow","Green","Blue","Violet","Gray","White"];
+const COLOR_VALS = {"Black":"black","Brown":"brown","Red":"red","Orange":"orange","Yellow":"#fbbf24","Green":"green","Blue":"blue","Violet":"violet","Gray":"gray","White":"white","Gold":"#d4af37","Silver":"#c0c0c0"};
+const MULTI = { Black:0, Brown:1, Red:2, Orange:3, Yellow:4, Green:5, Blue:6, Gold:-1, Silver:-2 };
+const TOL = { Brown:1, Red:2, Green:0.5, Blue:0.25, Violet:0.1, Gold:5, Silver:10 };
+
+function initColors() {
+    const cont = document.getElementById('color-selects');
+    cont.innerHTML = `<div class="space-y-1"><label class="text-[10px] uppercase font-bold text-slate-400">Band 1</label><select id="c1" onchange="updateColors()" class="w-full p-2 bg-white dark:bg-slate-800 rounded-lg text-sm">${COLORS.map((c,i)=>`<option value="${i}">${c}</option>`).join('')}</select></div><div class="space-y-1"><label class="text-[10px] uppercase font-bold text-slate-400">Band 2</label><select id="c2" onchange="updateColors()" class="w-full p-2 bg-white dark:bg-slate-800 rounded-lg text-sm">${COLORS.map((c,i)=>`<option value="${i}">${c}</option>`).join('')}</select></div><div class="space-y-1"><label class="text-[10px] uppercase font-bold text-slate-400">Multiplier</label><select id="c3" onchange="updateColors()" class="w-full p-2 bg-white dark:bg-slate-800 rounded-lg text-sm">${Object.keys(MULTI).map(m=>`<option value="${MULTI[m]}">${m}</option>`).join('')}</select></div><div class="space-y-1"><label class="text-[10px] uppercase font-bold text-slate-400">Tolerance</label><select id="c4" onchange="updateColors()" class="w-full p-2 bg-white dark:bg-slate-800 rounded-lg text-sm">${Object.keys(TOL).map(t=>`<option value="${TOL[t]}">${t}</option>`).join('')}</select></div>`;
+    updateColors();
+}
+function updateColors() {
+    const v1=parseInt(document.getElementById('c1').value), v2=parseInt(document.getElementById('c2').value), 
+          m=parseFloat(document.getElementById('c3').value), t=document.getElementById('c4').value;
+    document.getElementById('b1').setAttribute('fill', COLOR_VALS[COLORS[v1]]);
+    document.getElementById('b2').setAttribute('fill', COLOR_VALS[COLORS[v2]]);
+    document.getElementById('b3').setAttribute('fill', COLOR_VALS[Object.keys(MULTI).find(k=>MULTI[k]==m)]);
+    document.getElementById('b4').setAttribute('fill', COLOR_VALS[Object.keys(TOL).find(k=>TOL[k]==t)]);
+    let val = (v1*10 + v2) * Math.pow(10, m);
+    document.getElementById('color-res').innerText = formatResult(val, 'Ω') + " ±" + t + "%";
 }
 
 let rcT = 'T';
@@ -316,46 +349,6 @@ function calcPower(){
     if(pT==='V' && p && i) res=p/i;
     if(pT==='I' && p && v) res=p/v;
     document.getElementById('power-res').innerText = formatResult(res, pT==='P'?'W':pT);
-}
-
-const COLORS = ["Black","Brown","Red","Orange","Yellow","Green","Blue","Violet","Gray","White"];
-const MULTI = { Black:0, Brown:1, Red:2, Orange:3, Yellow:4, Green:5, Blue:6, Gold:-1, Silver:-2 };
-const TOL = { Brown:1, Red:2, Green:0.5, Blue:0.25, Violet:0.1, Gold:5, Silver:10 };
-
-function initColors() {
-    const cont = document.getElementById('color-selects');
-    cont.innerHTML = `<div class="space-y-1"><label class="text-[10px] uppercase font-bold text-slate-400">Band 1</label><select id="c1" onchange="updateColors()" class="w-full p-2 bg-white dark:bg-slate-800 rounded-lg text-sm">${COLORS.map((c,i)=>`<option value="${i}">${c}</option>`).join('')}</select></div><div class="space-y-1"><label class="text-[10px] uppercase font-bold text-slate-400">Band 2</label><select id="c2" onchange="updateColors()" class="w-full p-2 bg-white dark:bg-slate-800 rounded-lg text-sm">${COLORS.map((c,i)=>`<option value="${i}">${c}</option>`).join('')}</select></div><div class="space-y-1"><label class="text-[10px] uppercase font-bold text-slate-400">Multiplier</label><select id="c3" onchange="updateColors()" class="w-full p-2 bg-white dark:bg-slate-800 rounded-lg text-sm">${Object.keys(MULTI).map(m=>`<option value="${MULTI[m]}">${m}</option>`).join('')}</select></div><div class="space-y-1"><label class="text-[10px] uppercase font-bold text-slate-400">Tolerance</label><select id="c4" onchange="updateColors()" class="w-full p-2 bg-white dark:bg-slate-800 rounded-lg text-sm">${Object.keys(TOL).map(t=>`<option value="${TOL[t]}">${t}</option>`).join('')}</select></div>`;
-    updateColors();
-}
-function updateColors() {
-    const v1=parseInt(document.getElementById('c1').value), v2=parseInt(document.getElementById('c2').value), m=parseFloat(document.getElementById('c3').value), t=document.getElementById('c4').value;
-    let val = (v1*10 + v2) * Math.pow(10, m);
-    document.getElementById('color-res').innerText = formatResult(val, 'Ω') + " ±" + t + "%";
-}
-
-// NAVIGATION
-function openCalc(id) {
-    document.getElementById('dashboard').classList.add('hidden-view');
-    document.getElementById('calc-container').classList.remove('hidden-view');
-    document.querySelectorAll('.calc-view').forEach(v => v.classList.add('hidden-view'));
-    document.getElementById(id).classList.remove('hidden-view');
-    
-    // SEO Update
-    const titles = { 'calc-ohm': "Ohm's Law", 'calc-div': "Voltage Divider", 'calc-rc': "RC Timing", 'calc-wave': "Wavelength", 'calc-power': "Power Rechner", 'calc-color': "Resistor Colors" };
-    document.getElementById('meta-title').innerText = `EngiCalc - ${titles[id]}`;
-    document.getElementById('theory-desc').innerText = `Fundamental engineering principles of ${titles[id]} applied in modern circuits.`;
-
-    if(id==='calc-ohm') setOhmTarget('V');
-    if(id==='calc-div') setDivLoad(false);
-    if(id==='calc-rc') setRCTarget('T');
-    if(id==='calc-wave') setWaveTarget('L');
-    if(id==='calc-power') setPowerTarget('P');
-    if(id==='calc-color') initColors();
-}
-
-function showDashboard() { 
-    document.getElementById('calc-container').classList.add('hidden-view');
-    document.getElementById('dashboard').classList.remove('hidden-view');
 }
 
 function exportToPDF() {
