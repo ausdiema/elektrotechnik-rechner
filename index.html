@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title id="meta-title">EngiCalc Pro – Precision Engineering Suite</title>
-    <meta id="meta-desc" name="description" content="Professional electrical engineering suite featuring high-precision calculators for circuit design, RF, and power electronics.">
+    <meta id="meta-desc" name="description" content="Professional electrical engineering suite for precision calculations.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
@@ -25,15 +26,19 @@
     </script>
     <style>
         .hidden-view { display: none !important; }
-        .formula-box { background: rgba(37, 99, 235, 0.05); border: 1px solid rgba(37, 99, 235, 0.2); border-radius: 1.5rem; min-height: 100px; display: flex; align-items: center; justify-content: center; }
+        .formula-box { 
+            background: rgba(37, 99, 235, 0.05); border: 1px solid rgba(37, 99, 235, 0.2);
+            border-radius: 1.5rem; min-height: 100px; display: flex; align-items: center; justify-content: center;
+        }
         .dark .formula-box { background: rgba(255, 255, 255, 0.03); border-color: rgba(255, 255, 255, 0.1); }
         input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+        .searching-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
         .toggle-active { background-color: #2563eb !important; color: white !important; }
         
-        /* SEO Content Styling */
-        .seo-section h3 { @apply text-brand-600 dark:text-brand-500 font-bold text-xl mt-8 mb-4; }
-        .seo-section p { @apply text-slate-600 dark:text-slate-400 leading-relaxed mb-4; }
-        .e-series-table td { @apply border border-slate-200 dark:border-slate-800 p-2 text-center text-xs font-mono; }
+        /* SEO Content Styles */
+        .seo-content h3 { @apply text-lg font-bold mt-6 mb-2 text-brand-600 dark:text-brand-500; }
+        .seo-content p { @apply text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-4; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen font-sans transition-colors duration-300">
@@ -62,32 +67,32 @@
 </header>
 
 <main id="dashboard" class="max-w-7xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <div onclick="openCalc('calc-ohm', 'Ohm\'s Law')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm hover:shadow-xl transition-all">
+    <div onclick="openCalc('calc-ohm')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm hover:shadow-xl transition-all">
         <div class="text-brand-600 mb-4 font-bold font-mono">V = R · I</div>
         <h2 class="text-xl font-bold">Ohm's Law</h2>
         <p class="text-sm text-slate-500 mt-2">Voltage, Current, Resistance.</p>
     </div>
-    <div onclick="openCalc('calc-div', 'Voltage Divider')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm hover:shadow-xl transition-all">
+    <div onclick="openCalc('calc-div')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm hover:shadow-xl transition-all">
         <div class="text-brand-600 mb-4 font-bold font-mono">V_out = Vin · (R2/R_tot)</div>
         <h2 class="text-xl font-bold">Voltage Divider</h2>
         <p class="text-sm text-slate-500 mt-2">Loaded and Unloaded dividers.</p>
     </div>
-    <div onclick="openCalc('calc-rc', 'RC Constant')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm hover:shadow-xl transition-all">
+    <div onclick="openCalc('calc-rc')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm hover:shadow-xl transition-all">
         <div class="text-brand-600 mb-4 font-bold font-mono">τ = R · C</div>
         <h2 class="text-xl font-bold">RC Time Constant</h2>
         <p class="text-sm text-slate-500 mt-2">Charge and discharge timing.</p>
     </div>
-    <div onclick="openCalc('calc-wave', 'Wavelength')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm hover:shadow-xl transition-all">
+    <div onclick="openCalc('calc-wave')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm hover:shadow-xl transition-all">
         <div class="text-brand-600 mb-4 font-bold font-mono">λ = c / f</div>
         <h2 class="text-xl font-bold">Wavelength</h2>
         <p class="text-sm text-slate-500 mt-2">Frequency and RF wavelength.</p>
     </div>
-    <div onclick="openCalc('calc-power', 'Power Calculator')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm hover:shadow-xl transition-all">
+    <div onclick="openCalc('calc-power')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm hover:shadow-xl transition-all">
         <div class="text-brand-600 mb-4 font-bold font-mono">P = V · I</div>
-        <h2 class="text-xl font-bold">Power Calculator</h2>
+        <h2 class="text-xl font-bold">Power Rechner</h2>
         <p class="text-sm text-slate-500 mt-2">Electrical Power (DC).</p>
     </div>
-    <div onclick="openCalc('calc-color', 'Resistor Colors')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm hover:shadow-xl transition-all">
+    <div onclick="openCalc('calc-color')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm hover:shadow-xl transition-all">
         <div class="flex space-x-1 mb-4">
             <div class="w-4 h-4 bg-red-500 rounded-full"></div><div class="w-4 h-4 bg-black rounded-full"></div><div class="w-4 h-4 bg-orange-500 rounded-full"></div>
         </div>
@@ -99,10 +104,8 @@
 <div id="calc-container" class="max-w-4xl mx-auto p-6 hidden-view">
     <div class="flex justify-between items-center mb-8">
         <button onclick="showDashboard()" class="text-[10px] font-bold text-slate-400 hover:text-brand-600 tracking-widest uppercase">← Back to Dashboard</button>
-        
-        <button onclick="exportResultPDF()" class="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
-            <span>Export PDF Protocol</span>
+        <button onclick="exportToPDF()" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+            <span>Download PDF</span>
         </button>
     </div>
 
@@ -116,139 +119,242 @@
         </div>
     </section>
 
-    <article id="seo-deep-dive" class="mt-20 border-t border-slate-200 dark:border-slate-800 pt-12 seo-section">
-        <div id="dynamic-seo-content">
-            <h2 id="theory-title" class="text-3xl font-bold mb-6">Technical Engineering Insights</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <div>
-                    <h3>Theory & Principles</h3>
-                    <p id="theory-text">Select a calculator to view the underlying mathematical principles and physics equations used in this precision suite.</p>
-                </div>
-                <div>
-                    <h3>Industrial Application</h3>
-                    <p id="industry-text">Learn how these calculations are applied in sectors like Medical Technology and Automotive Engineering.</p>
-                </div>
-            </div>
-
-            <div class="mt-12">
-                <h3>Standard E-Series Reference (E12)</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full e-series-table bg-white dark:bg-slate-900">
-                        <tr><td>1.0</td><td>1.2</td><td>1.5</td><td>1.8</td><td>2.2</td><td>2.7</td></tr>
-                        <tr><td>3.3</td><td>3.9</td><td>4.7</td><td>5.6</td><td>6.8</td><td>8.2</td></tr>
-                    </table>
-                </div>
+    <section id="calc-div" class="calc-view hidden-view">
+        <div class="flex justify-center mb-6">
+            <div class="bg-slate-200 dark:bg-slate-800 p-1 rounded-xl inline-flex shadow-inner">
+                <button onclick="setDivLoad(false)" id="btn-unloaded" class="px-6 py-2 rounded-lg font-bold text-xs transition-all">Unloaded</button>
+                <button onclick="setDivLoad(true)" id="btn-loaded" class="px-6 py-2 rounded-lg font-bold text-xs transition-all">Loaded (RL)</button>
             </div>
         </div>
-    </article>
+        <div class="formula-box mb-8" id="formula-div"></div>
+        <div class="flex justify-center bg-white dark:bg-slate-900 p-6 rounded-3xl mb-8 border dark:border-slate-800">
+            <svg width="240" height="180" viewBox="0 0 240 180" class="text-slate-400">
+                <path d="M40 20 V50 M40 80 V110 M40 140 V160" stroke="currentColor" fill="none" stroke-width="2"/>
+                <rect x="25" y="50" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"/>
+                <rect x="25" y="110" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"/>
+                <text x="65" y="70" font-size="12" fill="currentColor">R1</text>
+                <text x="65" y="130" font-size="12" fill="currentColor">R2</text>
+                <circle cx="40" cy="95" r="3" fill="#3b82f6"/>
+                <path d="M40 95 H100" stroke="#3b82f6" fill="none" stroke-width="2" stroke-dasharray="3"/>
+                <g id="svg-load-group" style="display: none;">
+                    <path d="M100 95 V110 M100 140 V160 H40" stroke="#3b82f6" fill="none" stroke-width="2"/>
+                    <rect x="85" y="110" width="30" height="30" fill="none" stroke="#3b82f6" stroke-width="2"/>
+                    <text x="125" y="130" font-size="12" fill="#3b82f6" font-weight="bold">RL</text>
+                </g>
+                <text x="10" y="20" font-size="10" fill="currentColor">Vin</text>
+                <path d="M30 160 H50 M35 165 H45" stroke="currentColor" stroke-width="1"/>
+            </svg>
+        </div>
+        <div id="div-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        <div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Output Voltage (Vout)</span>
+            <div id="div-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div>
+        </div>
+    </section>
 
-    <footer class="mt-20 mb-10 p-8 rounded-3xl bg-brand-900/5 border border-brand-500/20 flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
-        <div class="w-20 h-20 rounded-full bg-brand-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">S</div>
+    <section id="calc-rc" class="calc-view hidden-view">
+        <div class="formula-box mb-8" id="formula-rc"></div>
+        <div class="mb-6 flex gap-2" id="rc-modes"></div>
+        <div id="rc-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        <div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Result</span>
+            <div id="rc-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div>
+        </div>
+    </section>
+
+    <section id="calc-wave" class="calc-view hidden-view">
+        <div class="formula-box mb-4" id="formula-wave"></div>
+        <div class="mb-8 p-4 bg-brand-600/10 rounded-xl border border-brand-600/20 text-center">
+            <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest">Constant Speed of Light (c)</span>
+            <div class="font-mono text-sm">299,792,458 m/s</div>
+        </div>
+        <div class="mb-6 flex gap-2" id="wave-modes"></div>
+        <div id="wave-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        <div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Result</span>
+            <div id="wave-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div>
+        </div>
+    </section>
+
+    <section id="calc-power" class="calc-view hidden-view">
+        <div class="formula-box mb-8" id="formula-power"></div>
+        <div class="mb-6 flex gap-2" id="power-modes"></div>
+        <div id="power-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        <div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800">
+            <div id="power-res" class="text-5xl font-mono font-bold text-brand-600">—</div>
+        </div>
+    </section>
+
+    <section id="calc-color" class="calc-view hidden-view">
+        <div class="flex justify-center mb-10 py-12 bg-slate-200 dark:bg-slate-800 rounded-3xl">
+            <svg width="300" height="100" viewBox="0 0 300 100">
+                <rect x="0" y="45" width="300" height="10" fill="#94a3b8"/>
+                <rect x="60" y="15" width="180" height="70" rx="20" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                <rect id="b1" x="90" y="15" width="15" height="70" fill="brown"/>
+                <rect id="b2" x="120" y="15" width="15" height="70" fill="black"/>
+                <rect id="b3" x="150" y="15" width="15" height="70" fill="red"/>
+                <rect id="b4" x="200" y="15" width="15" height="70" fill="gold"/>
+            </svg>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="color-selects"></div>
+        <div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800">
+            <div id="color-res" class="text-4xl font-mono font-bold text-brand-600">—</div>
+        </div>
+    </section>
+
+    <div id="seo-content" class="seo-content mt-16 pt-12 border-t border-slate-200 dark:border-slate-800">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+                <h3>Theoretical Background</h3>
+                <p id="theory-desc">Understanding the fundamental physics behind these calculations is key for any engineer. From the flow of electrons in resistive circuits to the electromagnetic properties of waves.</p>
+            </div>
+            <div>
+                <h3>Industry Applications</h3>
+                <p id="industry-desc">Precision calculations are vital in sectors like Medical Technology (signal conditioning) and Automotive (sensor calibration and power distribution).</p>
+            </div>
+        </div>
+        <div class="mt-8">
+            <h3>Standard E-Series Values</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs font-mono border-collapse">
+                    <tr class="bg-slate-100 dark:bg-slate-800">
+                        <td class="border border-slate-300 dark:border-slate-700 p-2">E12 Series</td>
+                        <td class="border border-slate-300 dark:border-slate-700 p-2">1.0, 1.2, 1.5, 1.8, 2.2, 2.7, 3.3, 3.9, 4.7, 5.6, 6.8, 8.2</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-16 p-8 bg-brand-500/5 rounded-3xl border border-brand-500/10 flex flex-col md:flex-row items-center gap-6">
+        <div class="w-16 h-16 rounded-full bg-brand-600 flex items-center justify-center text-white font-bold text-xl">S</div>
         <div>
-            <h4 class="text-lg font-bold">About the Developer</h4>
-            <p class="text-sm text-slate-500 leading-relaxed">
-                This engineering suite was developed by a <strong>Dual Student of Electrical Engineering and Information Technology</strong>. 
-                Designed for high-precision academic and industrial use, this tool bridges the gap between theoretical physics and 
-                practical circuit design in modern electronics.
-            </p>
+            <h4 class="font-bold text-lg">About the Developer</h4>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Developed by Simon, a dual student of Electrical Engineering and Information Technology at Karl Storz. This suite is built to provide academic-grade precision for everyday engineering tasks.</p>
         </div>
-    </footer>
+    </div>
 </div>
 
 <script>
-// CONTENT DATABASE FOR SEO
-const SEO_DATA = {
-    'calc-ohm': {
-        title: "Ohm's Law Calculator - Voltage, Current, Resistance",
-        desc: "Calculate V, I, and R instantly. Learn the relationship between potential difference and current flow in conductors.",
-        theory: "Ohm's law states that the current through a conductor between two points is directly proportional to the voltage across the two points. V = I × R.",
-        industry: "Crucial for sizing components in medical imaging devices and automotive sensor calibrations where precision is mandatory."
-    },
-    'calc-div': {
-        title: "Voltage Divider Calculator - Loaded & Unloaded",
-        desc: "Design precise voltage dividers for sensor signal conditioning. Supports load resistance calculations.",
-        theory: "A voltage divider produces an output voltage (Vout) that is a fraction of its input voltage (Vin). Vout = Vin * (R2 / (R1 + R2)).",
-        industry: "Used in Battery Management Systems (BMS) for electric vehicles to scale high voltages down to microcontroller levels."
+// ALL ORIGINAL LOGIC REMAINS UNTOUCHED
+const SI_MAP = [
+    { p: 'G', e: 9, l: 'G (10⁹)' }, { p: 'M', e: 6, l: 'M (10⁶)' }, { p: 'k', e: 3, l: 'k (10³)' },
+    { p: '', e: 0, l: 'Base (10⁰)' }, { p: 'm', e: -3, l: 'm (10⁻³)' }, { p: 'u', e: -6, l: 'μ (10⁻⁶)' },
+    { p: 'n', e: -9, l: 'n (10⁻⁹)' }, { p: 'p', e: -12, l: 'p (10⁻¹²)' }
+];
+
+function updateFormula(id, tex) {
+    const el = document.getElementById(id);
+    if (el) katex.render(tex, el, { throwOnError: false, displayMode: true });
+}
+
+function field(id, label, fn, isTarget = false) {
+    if(isTarget) {
+        return `<div class="p-6 rounded-2xl border-2 border-dashed border-brand-500/30 bg-brand-500/5 flex flex-col items-center justify-center space-y-2">
+            <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest searching-pulse">Calculating... Target</span>
+            <span class="text-xl font-bold text-slate-800 dark:text-slate-100">${label}</span>
+        </div>`;
     }
-    // Add more entries for other IDs...
-};
-
-// [KEEP ALL YOUR ORIGINAL SI_MAP, UI GENERATORS, AND CALCULATION LOGIC HERE]
-
-// NAVIGATION OVERRIDE
-let activeCalcName = "";
-
-function openCalc(id, name) {
-    activeCalcName = name;
-    document.getElementById('dashboard').classList.add('hidden-view');
-    document.getElementById('calc-container').classList.remove('hidden-view');
-    document.querySelectorAll('.calc-view').forEach(v => v.classList.add('hidden-view'));
-    document.getElementById(id).classList.remove('hidden-view');
-    
-    // Update SEO Meta Tags
-    const data = SEO_DATA[id] || { title: name, desc: "Precision calculation tool.", theory: "Theory details coming soon.", industry: "Used in industrial automation." };
-    document.getElementById('meta-title').innerText = data.title + " | EngiCalc Pro";
-    document.getElementById('meta-desc').content = data.desc;
-    
-    // Update Content Section
-    document.getElementById('theory-title').innerText = `Understanding ${name}`;
-    document.getElementById('theory-text').innerText = data.theory;
-    document.getElementById('industry-text').innerText = data.industry;
-
-    // Trigger original init logic
-    if(id==='calc-ohm') setOhmTarget('V');
-    if(id==='calc-div') setDivLoad(false);
-    if(id==='calc-rc') setRCTarget('T');
-    if(id==='calc-wave') setWaveTarget('L');
-    if(id==='calc-power') setPowerTarget('P');
-    if(id==='calc-color') initColors();
+    return `<div class="space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">${label}</label>
+        <div class="flex shadow-sm rounded-xl overflow-hidden ring-1 ring-slate-200 dark:ring-slate-800 focus-within:ring-2 focus-within:ring-brand-600 transition-all">
+            <input id="${id}" type="number" step="any" oninput="${fn}" placeholder="0.00" class="flex-grow p-4 bg-white dark:bg-slate-900 outline-none font-mono text-lg w-full">
+            <select id="${id}_u" onchange="${fn}" class="bg-slate-100 dark:bg-slate-800 border-none text-[10px] font-bold px-2 outline-none cursor-pointer">
+                ${SI_MAP.map(s => `<option value="${s.e}" ${s.e===0?'selected':''}>${s.l}</option>`).join('')}
+            </select>
+        </div>
+    </div>`;
 }
 
-// NEW: PDF EXPORT LOGIC
-function exportResultPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const result = document.querySelector('.calc-view:not(.hidden-view) [id$="-res"]').innerText;
-    
-    // Branding
-    doc.setFontSize(22);
-    doc.setTextColor(37, 99, 235);
-    doc.text("ENGICALC PRO", 20, 20);
-    
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.text("Precision Engineering Protocol", 20, 28);
-    doc.line(20, 32, 190, 32);
-    
-    // Content
-    doc.setFontSize(14);
-    doc.setTextColor(0);
-    doc.text(`Calculator: ${activeCalcName}`, 20, 50);
-    doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 60);
-    
-    doc.setFontSize(18);
-    doc.setFont("courier", "bold");
-    doc.text(`FINAL RESULT: ${result}`, 20, 85);
-    
-    // Footer
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.text("Verified by EngiCalc Pro Suite - Professional Grade Accuracy.", 20, 280);
-    
-    doc.save(`EngiCalc_${activeCalcName.replace(/\s/g, '_')}_Report.pdf`);
+function getVal(id) {
+    const el = document.getElementById(id);
+    if(!el || el.value === "") return null;
+    const exponent = parseFloat(document.getElementById(id+'_u').value);
+    return parseFloat(el.value) * Math.pow(10, exponent);
 }
 
-function showDashboard() { 
-    document.getElementById('calc-container').classList.add('hidden-view');
-    document.getElementById('dashboard').classList.remove('hidden-view');
-    document.getElementById('meta-title').innerText = "EngiCalc Pro – Precision Engineering Suite";
+function formatResult(val, unit) {
+    if(val === null || isNaN(val) || !isFinite(val)) return "—";
+    const abs = Math.abs(val);
+    let p = SI_MAP.find(s => abs >= Math.pow(10, s.e)) || SI_MAP[SI_MAP.length-1];
+    let num = (val / Math.pow(10, p.e)).toLocaleString('en-US', { maximumFractionDigits: 4 });
+    return `${num} ${p.p}${unit} (${p.l})`;
 }
 
-function toggleDark() { document.documentElement.classList.toggle('dark'); }
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('hidden-view'); }
+// OHM LOGIC
+let ohmT = 'V';
+function setOhmTarget(t) {
+    ohmT = t;
+    const btns = [['V','Voltage'], ['I','Current'], ['R','Resistance']];
+    document.getElementById('ohm-modes').innerHTML = btns.map(b => `
+        <button onclick="setOhmTarget('${b[0]}')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all ${ohmT===b[0] ? 'bg-brand-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}">Find ${b[1]}</button>
+    `).join('');
+    const inp = document.getElementById('ohm-inputs');
+    if(t==='V') inp.innerHTML = field('o_r','Resistance (Ω)','calcOhm()')+field('o_i','Current (A)','calcOhm()')+field('','Voltage (V)','',true);
+    if(t==='I') inp.innerHTML = field('o_v','Voltage (V)','calcOhm()')+field('o_r','Resistance (Ω)','calcOhm()')+field('','Current (A)','',true);
+    if(t==='R') inp.innerHTML = field('o_v','Voltage (V)','calcOhm()')+field('o_i','Current (A)','calcOhm()')+field('','Resistance (Ω)','',true);
+    updateFormula('formula-ohm', t==='V'?'V = R \\cdot I':t==='I'?'I = \\frac{V}{R}':'R = \\frac{V}{I}');
+    calcOhm();
+}
+function calcOhm(){
+    let v=getVal('o_v'), r=getVal('o_r'), i=getVal('o_i'), res=null;
+    if(ohmT==='V' && r!==null && i!==null) res=r*i;
+    if(ohmT==='I' && v!==null && r) res=v/r;
+    if(ohmT==='R' && v!==null && i) res=v/i;
+    document.getElementById('ohm-res').innerText = formatResult(res, ohmT);
+}
 
-// (Continue with your original calcOhm, calcDiv, calcRC, etc. functions...)
-</script>
-</body>
-</html>
+// DIVIDER LOGIC
+let divLoaded = false;
+function setDivLoad(isLoaded) {
+    divLoaded = isLoaded;
+    document.getElementById('btn-unloaded').className = isLoaded ? 'px-6 py-2 rounded-lg font-bold text-xs' : 'px-6 py-2 rounded-lg font-bold text-xs toggle-active';
+    document.getElementById('btn-loaded').className = isLoaded ? 'px-6 py-2 rounded-lg font-bold text-xs toggle-active' : 'px-6 py-2 rounded-lg font-bold text-xs';
+    document.getElementById('svg-load-group').style.display = isLoaded ? 'block' : 'none';
+    const inp = document.getElementById('div-inputs');
+    let html = field('d_v','Input Voltage (Vin)','calcDiv()')+field('d_r1','Resistor R1 (Ω)','calcDiv()')+field('d_r2','Resistor R2 (Ω)','calcDiv()');
+    if(isLoaded) html += field('d_rl', 'Load Resistor RL (Ω)', 'calcDiv()');
+    inp.innerHTML = html;
+    updateFormula('formula-div', isLoaded ? 'V_{out} = V_{in} \\cdot \\frac{R_2 \\parallel R_L}{R_1 + (R_2 \\parallel R_L)}' : 'V_{out} = V_{in} \\cdot \\frac{R_2}{R_1 + R_2}');
+    calcDiv();
+}
+function calcDiv(){
+    let vin=getVal('d_v'), r1=getVal('d_r1'), r2=getVal('d_r2'), rl=getVal('d_rl'), res=null;
+    if(vin!==null && r1!==null && r2!==null){
+        let r2eff = (divLoaded && rl) ? (r2*rl)/(r2+rl) : r2;
+        res = vin * (r2eff / (r1 + r2eff));
+    }
+    document.getElementById('div-res').innerText = formatResult(res, 'V');
+}
+
+// RC LOGIC
+let rcT = 'T';
+function setRCTarget(t) {
+    rcT = t;
+    const btns = [['T','Time (τ)'], ['R','Resistance'], ['C','Capacitance']];
+    document.getElementById('rc-modes').innerHTML = btns.map(b => `
+        <button onclick="setRCTarget('${b[0]}')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all ${rcT===b[0] ? 'bg-brand-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}">Find ${b[1]}</button>
+    `).join('');
+    const inp = document.getElementById('rc-inputs');
+    if(t==='T') inp.innerHTML = field('rc_r','Resistance (Ω)','calcRC()')+field('rc_c','Capacitance (F)','calcRC()')+field('','Time Constant (τ)','',true);
+    if(t==='R') inp.innerHTML = field('rc_t','Time (τ)','calcRC()')+field('rc_c','Capacitance (F)','calcRC()')+field('','Resistance (Ω)','',true);
+    if(t==='C') inp.innerHTML = field('rc_t','Time (τ)','calcRC()')+field('rc_r','Resistance (Ω)','calcRC()')+field('','Capacitance (F)','',true);
+    updateFormula('formula-rc', t==='T'?'\\tau = R \\cdot C':t==='R'?'R = \\frac{\\tau}{C}':'C = \\frac{\\tau}{R}');
+    calcRC();
+}
+function calcRC(){
+    let r=getVal('rc_r'), c=getVal('rc_c'), t=getVal('rc_t'), res=null;
+    if(rcT==='T' && r && c) res=r*c;
+    if(rcT==='R' && t && c) res=t/c;
+    if(rcT==='C' && t && r) res=t/r;
+    document.getElementById('rc-res').innerText = formatResult(res, rcT==='T'?'s':rcT==='R'?'Ω':'F');
+}
+
+// WAVE LOGIC
+let wvT = 'L';
+const lightC = 299792458;
+function setWaveTarget(t) {
+    wvT = t;
+    const btns = [['L','Wavelength (λ)'], ['F','Frequency (f)']];
+    document.getElementById('wave-modes').innerHTML = btns.map(b => `
+        <button onclick="setWaveTarget('${b[0]}')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all ${wvT===b[0] ? 'bg
