@@ -37,6 +37,11 @@
         .toggle-active { background-color: #2563eb !important; color: white !important; }
         .seo-content h3 { @apply text-lg font-bold mt-6 mb-2 text-brand-600 dark:text-brand-500; }
         .seo-content p { @apply text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-4; }
+        
+        /* Validation & Copy Styles */
+        .input-error { border: 2px solid #ef4444 !important; }
+        .copy-btn:active { transform: scale(0.9); color: #3b82f6; }
+        .history-card { @apply p-3 rounded-xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 mb-2; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen font-sans transition-colors duration-300">
@@ -46,7 +51,8 @@
         <h3 class="font-bold text-xs tracking-widest text-brand-600 uppercase">Calculation History</h3>
         <button onclick="toggleSidebar()" class="text-2xl hover:text-brand-600">✕</button>
     </div>
-    <div id="history-list" class="space-y-3 overflow-y-auto max-h-[85vh] font-mono text-[11px]"></div>
+    <div id="history-list" class="space-y-3 overflow-y-auto max-h-[75vh] font-mono text-[11px] mb-4"></div>
+    <button onclick="clearHistory()" class="w-full py-3 rounded-xl bg-red-500/10 text-red-500 text-[10px] font-bold uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Clear History</button>
 </div>
 
 <header class="max-w-7xl mx-auto p-6 md:p-10 flex justify-between items-center">
@@ -87,7 +93,7 @@
     </div>
     <div onclick="openCalc('calc-power')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm hover:shadow-xl transition-all">
         <div class="text-brand-600 mb-4 font-bold font-mono">P = V · I</div>
-        <h2 class="text-xl font-bold">Power Rechner</h2>
+        <h2 class="text-xl font-bold">Power Calculator</h2>
         <p class="text-sm text-slate-500 mt-2">Electrical Power (DC).</p>
     </div>
     <div onclick="openCalc('calc-color')" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-600 cursor-pointer shadow-sm hover:shadow-xl transition-all">
@@ -109,8 +115,9 @@
         <div class="formula-box mb-8" id="formula-ohm"></div>
         <div class="mb-6 flex gap-2" id="ohm-modes"></div>
         <div id="ohm-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-        <div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800">
+        <div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800 relative group">
             <div id="ohm-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div>
+            <button onclick="copyToClipboard('ohm-res')" class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity copy-btn">📋</button>
         </div>
     </section>
 
@@ -121,7 +128,6 @@
                 <button onclick="setDivLoad(true)" id="btn-loaded" class="px-6 py-2 rounded-lg font-bold text-xs transition-all">Loaded (RL)</button>
             </div>
         </div>
-        
         <div class="flex justify-center bg-white dark:bg-slate-900 p-6 rounded-3xl mb-8 border dark:border-slate-800">
             <svg width="240" height="180" viewBox="0 0 240 180" class="text-slate-400">
                 <path d="M40 20 V50 M40 80 V110 M40 140 V160" stroke="currentColor" fill="none" stroke-width="2"/>
@@ -140,11 +146,11 @@
                 <path d="M30 160 H50 M35 165 H45" stroke="currentColor" stroke-width="1"/>
             </svg>
         </div>
-
         <div class="formula-box mb-8" id="formula-div"></div>
         <div id="div-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-        <div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800">
+        <div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800 relative group">
             <div id="div-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div>
+            <button onclick="copyToClipboard('div-res')" class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity copy-btn">📋</button>
         </div>
     </section>
 
@@ -160,14 +166,15 @@
             </svg>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" id="color-selects"></div>
-        <div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800">
+        <div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800 relative group">
             <div id="color-res" class="text-4xl font-mono font-bold text-brand-600">—</div>
+            <button onclick="copyToClipboard('color-res')" class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity copy-btn">📋</button>
         </div>
     </section>
 
-    <section id="calc-rc" class="calc-view hidden-view"><div class="formula-box mb-8" id="formula-rc"></div><div class="mb-6 flex gap-2" id="rc-modes"></div><div id="rc-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div><div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800"><div id="rc-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div></div></section>
-    <section id="calc-wave" class="calc-view hidden-view"><div class="formula-box mb-8" id="formula-wave"></div><div class="mb-6 flex gap-2" id="wave-modes"></div><div id="wave-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div><div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800"><div id="wave-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div></div></section>
-    <section id="calc-power" class="calc-view hidden-view"><div class="formula-box mb-8" id="formula-power"></div><div class="mb-6 flex gap-2" id="power-modes"></div><div id="power-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div><div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800"><div id="power-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div></div></section>
+    <section id="calc-rc" class="calc-view hidden-view"><div class="formula-box mb-8" id="formula-rc"></div><div class="mb-6 flex gap-2" id="rc-modes"></div><div id="rc-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div><div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800 relative group"><div id="rc-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div><button onclick="copyToClipboard('rc-res')" class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity copy-btn">📋</button></div></section>
+    <section id="calc-wave" class="calc-view hidden-view"><div class="formula-box mb-8" id="formula-wave"></div><div class="mb-6 flex gap-2" id="wave-modes"></div><div id="wave-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div><div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800 relative group"><div id="wave-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div><button onclick="copyToClipboard('wave-res')" class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity copy-btn">📋</button></div></section>
+    <section id="calc-power" class="calc-view hidden-view"><div class="formula-box mb-8" id="formula-power"></div><div class="mb-6 flex gap-2" id="power-modes"></div><div id="power-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div><div class="mt-10 p-10 bg-white dark:bg-slate-900 rounded-3xl text-center border dark:border-slate-800 relative group"><div id="power-res" class="text-5xl font-mono font-bold text-brand-600 mt-2">—</div><button onclick="copyToClipboard('power-res')" class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity copy-btn">📋</button></div></section>
 
     <div id="seo-content" class="seo-content mt-16 pt-12 border-t border-slate-200 dark:border-slate-800">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -184,19 +191,41 @@ const SI_MAP = [
     { p: 'n', e: -9, l: 'n (10⁻⁹)' }, { p: 'p', e: -12, l: 'p (10⁻¹²)' }
 ];
 
+let history = JSON.parse(localStorage.getItem('engicalc_history')) || [];
+
 function updateFormula(id, tex) {
     const el = document.getElementById(id);
     if (el) katex.render(tex, el, { throwOnError: false, displayMode: true });
 }
 
+// DRY Field generator with Validation & Enter support
 function field(id, label, fn, isTarget = false) {
     if(isTarget) return `<div class="p-6 rounded-2xl border-2 border-dashed border-brand-500/30 bg-brand-500/5 flex flex-col items-center justify-center space-y-2"><span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest searching-pulse">Calculating...</span><span class="text-xl font-bold">${label}</span></div>`;
-    return `<div class="space-y-2"><label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">${label}</label><div class="flex shadow-sm rounded-xl overflow-hidden ring-1 ring-slate-200 dark:ring-slate-800 focus-within:ring-2 focus-within:ring-brand-600 transition-all"><input id="${id}" type="number" step="any" oninput="${fn}" placeholder="0.00" class="flex-grow p-4 bg-white dark:bg-slate-900 outline-none font-mono text-lg w-full"><select id="${id}_u" onchange="${fn}" class="bg-slate-100 dark:bg-slate-800 border-none text-[10px] font-bold px-2 outline-none cursor-pointer">${SI_MAP.map(s => `<option value="${s.e}" ${s.e===0?'selected':''}>${s.l}</option>`).join('')}</select></div></div>`;
+    return `
+    <div class="space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">${label}</label>
+        <div class="flex shadow-sm rounded-xl overflow-hidden ring-1 ring-slate-200 dark:ring-slate-800 focus-within:ring-2 focus-within:ring-brand-600 transition-all">
+            <input id="${id}" type="number" step="any" oninput="validate(this); ${fn}" onkeydown="handleEnter(event, ${fn})" placeholder="0.00" class="flex-grow p-4 bg-white dark:bg-slate-900 outline-none font-mono text-lg w-full">
+            <select id="${id}_u" onchange="${fn}" class="bg-slate-100 dark:bg-slate-800 border-none text-[10px] font-bold px-2 outline-none cursor-pointer">
+                ${SI_MAP.map(s => `<option value="${s.e}" ${s.e===0?'selected':''}>${s.l}</option>`).join('')}
+            </select>
+        </div>
+    </div>`;
+}
+
+function handleEnter(e, fn) { if(e.key === 'Enter') fn(); }
+
+function validate(input) {
+    if(input.value < 0) {
+        input.classList.add('input-error');
+    } else {
+        input.classList.remove('input-error');
+    }
 }
 
 function getVal(id) {
     const el = document.getElementById(id);
-    if(!el || el.value === "") return null;
+    if(!el || el.value === "" || parseFloat(el.value) < 0) return null;
     const exponent = parseFloat(document.getElementById(id+'_u').value);
     return parseFloat(el.value) * Math.pow(10, exponent);
 }
@@ -209,12 +238,57 @@ function formatResult(val, unit) {
     return `${num} ${p.p}${unit}`;
 }
 
-// NAVIGATION
+// History Logic
+function addToHistory(calcName, formula, result) {
+    if(result === "—" || result.includes("NaN")) return;
+    const entry = {
+        id: Date.now(),
+        name: calcName,
+        formula: formula,
+        res: result,
+        time: new Date().toLocaleTimeString()
+    };
+    history.unshift(entry);
+    if(history.length > 20) history.pop();
+    localStorage.setItem('engicalc_history', JSON.stringify(history));
+    renderHistory();
+}
+
+function renderHistory() {
+    const list = document.getElementById('history-list');
+    list.innerHTML = history.map(h => `
+        <div class="history-card">
+            <div class="flex justify-between opacity-50 mb-1"><span>${h.name}</span><span>${h.time}</span></div>
+            <div class="font-bold text-brand-600">${h.res}</div>
+            <div class="text-[9px] mt-1 text-slate-400 italic">${h.formula}</div>
+        </div>
+    `).join('');
+}
+
+function clearHistory() {
+    history = [];
+    localStorage.removeItem('engicalc_history');
+    renderHistory();
+}
+
+function copyToClipboard(id) {
+    const text = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(text);
+}
+
+// Navigation
 function openCalc(id) {
     document.getElementById('dashboard').classList.add('hidden-view');
     document.getElementById('calc-container').classList.remove('hidden-view');
     document.querySelectorAll('.calc-view').forEach(v => v.classList.add('hidden-view'));
     document.getElementById(id).classList.remove('hidden-view');
+    
+    // Auto-focus logic
+    setTimeout(() => {
+        const firstInput = document.getElementById(id).querySelector('input');
+        if(firstInput) firstInput.focus();
+    }, 100);
+
     if(id==='calc-ohm') setOhmTarget('V');
     if(id==='calc-div') setDivLoad(false);
     if(id==='calc-rc') setRCTarget('T');
@@ -228,7 +302,7 @@ function showDashboard() {
     document.getElementById('dashboard').classList.remove('hidden-view');
 }
 
-// LOGIC MODULES
+// Modules with History Integration
 let ohmT = 'V';
 function setOhmTarget(t) {
     ohmT = t;
@@ -246,7 +320,9 @@ function calcOhm(){
     if(ohmT==='V' && r!==null && i!==null) res=r*i;
     if(ohmT==='I' && v!==null && r) res=v/r;
     if(ohmT==='R' && v!==null && i) res=v/i;
-    document.getElementById('ohm-res').innerText = formatResult(res, ohmT);
+    const formatted = formatResult(res, ohmT);
+    document.getElementById('ohm-res').innerText = formatted;
+    if(res) addToHistory("Ohm's Law", document.getElementById('formula-ohm').innerText, formatted);
 }
 
 let divLoaded = false;
@@ -268,7 +344,9 @@ function calcDiv(){
         let r2eff = (divLoaded && rl) ? (r2*rl)/(r2+rl) : r2;
         res = vin * (r2eff / (r1 + r2eff));
     }
-    document.getElementById('div-res').innerText = formatResult(res, 'V');
+    const formatted = formatResult(res, 'V');
+    document.getElementById('div-res').innerText = formatted;
+    if(res) addToHistory("Voltage Divider", "Vout Calculation", formatted);
 }
 
 const COLORS = ["Black","Brown","Red","Orange","Yellow","Green","Blue","Violet","Gray","White"];
@@ -309,7 +387,9 @@ function calcRC(){
     if(rcT==='T' && r && c) res=r*c;
     if(rcT==='R' && t && c) res=t/c;
     if(rcT==='C' && t && r) res=t/r;
-    document.getElementById('rc-res').innerText = formatResult(res, rcT==='T'?'s':rcT==='R'?'Ω':'F');
+    const formatted = formatResult(res, rcT==='T'?'s':rcT==='R'?'Ω':'F');
+    document.getElementById('rc-res').innerText = formatted;
+    if(res) addToHistory("RC Time", "Tau Calculation", formatted);
 }
 
 let wvT = 'L';
@@ -328,7 +408,9 @@ function calcWave(){
     let f=getVal('wv_f'), l=getVal('wv_l'), res=null;
     if(wvT==='L' && f) res=lightC/f;
     if(wvT==='F' && l) res=lightC/l;
-    document.getElementById('wave-res').innerText = formatResult(res, wvT==='L'?'m':'Hz');
+    const formatted = formatResult(res, wvT==='L'?'m':'Hz');
+    document.getElementById('wave-res').innerText = formatted;
+    if(res) addToHistory("Wavelength", "Speed of Light constant", formatted);
 }
 
 let pT = 'P';
@@ -348,20 +430,32 @@ function calcPower(){
     if(pT==='P' && v && i) res=v*i;
     if(pT==='V' && p && i) res=p/i;
     if(pT==='I' && p && v) res=p/v;
-    document.getElementById('power-res').innerText = formatResult(res, pT==='P'?'W':pT);
+    const formatted = formatResult(res, pT==='P'?'W':pT);
+    document.getElementById('power-res').innerText = formatted;
+    if(res) addToHistory("Power", "P=V*I", formatted);
 }
 
 function exportToPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     const res = document.querySelector('.calc-view:not(.hidden-view) div[id$="-res"]').innerText;
+    doc.setFontSize(22);
     doc.text("EngiCalc Pro Protocol", 20, 20);
-    doc.text(`Result: ${res}`, 20, 30);
-    doc.save("Calculation.pdf");
+    doc.setFontSize(12);
+    doc.text(`User: Simon`, 20, 35);
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 42);
+    doc.text(`Result: ${res}`, 20, 55);
+    doc.save("EngiCalc_Protocol.pdf");
 }
 
 function toggleDark() { document.documentElement.classList.toggle('dark'); }
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('hidden-view'); }
+function toggleSidebar() { 
+    document.getElementById('sidebar').classList.toggle('hidden-view'); 
+    renderHistory();
+}
+
+// Init
+window.onload = () => { renderHistory(); };
 </script>
 </body>
 </html>
